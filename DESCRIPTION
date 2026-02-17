@@ -1,0 +1,17 @@
+Package: BayesCoMET
+Title: Compressed Bayesian Mixed-Effects Model for Tensors
+Version: 0.0.0.9000
+Authors@R: 
+    person("Sreya", "Sarkar", , "sreya-sarkar@uiowa.edu", role = c("aut", "cre"))
+Description: Implements scalable Bayesian compressed mixed-effects models for high-dimensional tensor-valued features using efficient collapsed Gibbs sampler. It integrates low-rank tensor factorization with margin-structured shrinkage priors for fixed-effects inference and performs mode-wise random projection on a separable random-effects covariance structure.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
+Imports: 
+    Matrix,
+    Rcpp,
+    rTensor
