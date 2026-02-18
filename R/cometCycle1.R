@@ -1,4 +1,4 @@
-#' @title comet
+#' @title cometCycle1
 #'
 #' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
 #'

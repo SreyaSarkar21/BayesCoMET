@@ -2,7 +2,7 @@
 % Please edit documentation in R/cometCycle2.R
 \name{cometCycle2}
 \alias{cometCycle2}
-\title{comet}
+\title{cometCycle2}
 \usage{
 cometCycle2(
   yijs,
