@@ -1,3 +1,34 @@
+#' @title comet
+#'
+#' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
+#'
+#' @param yijs a vector containing the response for all the observations.
+#' @param xijlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
+#' @param zi_tilde_list a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.
+#' @param mis a vector of cluster sizes.
+#' @param B_factors fixed-effect factor matrices sampled in previous iteration.
+#' @param K a user-specified CP rank of fixed-effect coefficient \eqn{\mathcal{B}}. Should not exceed the dimensions for matrix-valued covariates.
+#' @param a0 shape hyperparameter for inverse-gamma prior for idiosyncratic error variance.
+#' @param b0 scale hyperparameter for inverse-gamma prior for idiosyncratic error variance.
+#' @param errVar idiosyncratic error variance sampled in previous iteration.
+#' @param lambda2_list a list of length \eqn{D}, each containing \eqn{K p_d} squared local shrinkage \eqn{\lambda^2} values from previous iteration.
+#' @param delta2_list a vector of length \eqn{K}, value of rank-\eqn{g}-specific global shrinkage \eqn{\delta^2} values from previous iteration.
+#' @param nu_list a list of length \eqn{D}, each containing \eqn{K p_d} auxiliary variable \eqn{\nu} values from previous iteration.
+#' @param xi_list a vector of length \eqn{K}, value of rank-\eqn{g}-specific auxiliary variable \eqn{\xi_g} values from previous iteration.
+#' @param Gkron \eqn{\Gamma_D \Gamma_D^{\top} \otimes \dots \otimes \Gamma_1 \Gamma_1^{\top}} computed using the \eqn{\Gamma_d} updates from the previous iteration.
+#' @param RRtkron \eqn{R_D R_D^{\top} \otimes \dots \otimes R_1 R_1^{\top}} computed at the start of the model fitting.
+#' @return a list containing the following components:
+#' \describe{
+#' \item{BfactorsSamp}{a list of length \eqn{D}, each component comprising the posterior draw of \eqn{p_d \times K} factor matrix \eqn{B_d}.}
+#' \item{BSamp}{an array denoting the updated fixed-effect parameter \eqn{\mathcal{B}}.}
+#' \item{errVarSamp}{the updated posterior draw of error variance \eqn{\tau^2}.}
+#' \item{lambda2Samplist}{a list of length \eqn{D}, each component containing the updated \eqn{K p_d} squared local shrinkage \eqn{\lambda^2} draws.}
+#' \item{delta2Samplist}{a vector of length \eqn{K} storing the updated rank-\eqn{g}-specific global shrinkage \eqn{\delta^2} draws.}
+#' \item{nuSamplist}{a list of length \eqn{D}, each component containing the updated \eqn{K p_d} auxiliary variable \eqn{nu} draws.}
+#' \item{xiSamplist}{a vector of length \eqn{K} storing the updated rank-\eqn{g}-specific auxiliary variable \eqn{\xi_g} draws.}
+#' }
+#' @importFrom stats rnorm rgamma
+
 cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
                          B_factors, K, a0, b0,
                          errVar, lambda2_list, delta2_list, nu_list, xi_list,
@@ -34,7 +65,7 @@ cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
     ################# Given \tau^2, sample B in 3 steps #################
     for(d in 1:nmodes) {
         xmat_rowlist <- lapply(xijlist,
-                               function(foo) {as.vector(mode_matrix(foo, d) %*% B_lookr(B_factors, d))})
+                               function(foo) {as.vector(mode_matricize(foo, d) %*% khRaoBLOO(B_factors, d))})
         xmat_list <- lapply(1:n,
                             function(i) {
                                 rows_i <- mis_starts[i]:mis_cumsum[i]
@@ -59,7 +90,7 @@ cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
         }
     }
 
-    B <- B_cp(B_factors)
+    B <- cpB(B_factors)
 
     ### Given updated B, \lambda's, sample \delta^2_g and \xi_g ###
     g_sums <- sapply(1:K, function(g) {
@@ -96,7 +127,7 @@ cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
     ##################### return samples #####################
     list(BfactorsSamp = B_factors,
          BSamp = B, errVarSamp = errVar,
-         delta2Samplist = delta2_list, lambda2Samplist = lambda2_list,
+         lambda2Samplist = lambda2_list, delta2Samplist = delta2_list,
          nuSamplist = nu_list, xiSamplist = xi_list)
 }
 

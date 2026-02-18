@@ -88,9 +88,9 @@ comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
 
     ### compute compressed random-effect tensor covariates \mathcal{\tilde Z}_{ij} ###
     comp_zijlist <- vector("list", N)
-    Skron_not1 <- LOOrevkron(S_list, d = 1)
+    Skron_not1 <- revkronLOO(S_list, d = 1)
     for(ij in 1:N) {
-        zij_tilde_mode1 <- S_list[[1]] %*% tcrossprod(mode_matrix(zijlist[[ij]], d = 1), Skron_not1)
+        zij_tilde_mode1 <- S_list[[1]] %*% tcrossprod(mode_matricize(zijlist[[ij]], d = 1), Skron_not1)
         comp_zijlist[[ij]] <- array(zij_tilde_mode1, dim = kdims)
     }
     vec_comp_zijlist <- lapply(comp_zijlist,
@@ -101,20 +101,21 @@ comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
                                 do.call("rbind", vec_comp_zijlist[rows_i])
                             })
 
+    vecxijlist <- lapply(xijlist, as.vector)
+
     RRtkron <- revkronAll(lapply(R_list, tcrossprod))
 
     cts <- 0
     startTime <- proc.time()
     for(its in 1:niter) {
         if(its %% 1000 == 0) cat("iteration: ", its, "\n")
-        cycle1Samp <- cometCycle1(yijs = yijs, xijlist = xijlist, comp_zijlist = comp_zijlist,
+        cycle1Samp <- cometCycle1(yijs = yijs, vecxijlist = vecxijlist, comp_zijlist = comp_zijlist,
                                    zi_tilde_list = zi_tilde_list, mis = mis,
                                    B = B, errVar = errVar,
                                    Gamma_list = Gamma_list, Sigma_gamma_list = Sigma_gamma_list,
                                    kdims = kdims, RRtkron = RRtkron)
         ### Update compressed covariance parameters Gammas ###
         Gamma_list <- cycle1Samp$GammaSamplist
-        #print("Cycle1 Done")
 
         Gkron <- revkronAll(Gamma_list)
         cycle2Samp <- cometCycle2(yijs = yijs, xijlist = xijlist,
@@ -136,7 +137,6 @@ comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
         xi_list <- cycle2Samp$xiSamplist
         delta2_list <- cycle2Samp$delta2Samplist
         errVar <- cycle2Samp$errVarSamp
-        #print("Cycle2 Done")
 
         ### Store samples ###
         if (its > nburn & its %% nthin == 0) {

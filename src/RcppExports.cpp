@@ -11,15 +11,15 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// mode_matrix_cpp
-arma::mat mode_matrix_cpp(const NumericVector& A, const int d);
-RcppExport SEXP _BayesCoMET_mode_matrix_cpp(SEXP ASEXP, SEXP dSEXP) {
+// mode_matricize_cpp
+arma::mat mode_matricize_cpp(const NumericVector& A, const int d);
+RcppExport SEXP _BayesCoMET_mode_matricize_cpp(SEXP ASEXP, SEXP dSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericVector& >::type A(ASEXP);
     Rcpp::traits::input_parameter< const int >::type d(dSEXP);
-    rcpp_result_gen = Rcpp::wrap(mode_matrix_cpp(A, d));
+    rcpp_result_gen = Rcpp::wrap(mode_matricize_cpp(A, d));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -34,15 +34,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// LOOrevkron_cpp
-arma::mat LOOrevkron_cpp(const List& Glist, const int d);
-RcppExport SEXP _BayesCoMET_LOOrevkron_cpp(SEXP GlistSEXP, SEXP dSEXP) {
+// revkronLOO_cpp
+arma::mat revkronLOO_cpp(const List& Glist, const int d);
+RcppExport SEXP _BayesCoMET_revkronLOO_cpp(SEXP GlistSEXP, SEXP dSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const List& >::type Glist(GlistSEXP);
     Rcpp::traits::input_parameter< const int >::type d(dSEXP);
-    rcpp_result_gen = Rcpp::wrap(LOOrevkron_cpp(Glist, d));
+    rcpp_result_gen = Rcpp::wrap(revkronLOO_cpp(Glist, d));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -58,24 +58,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// B_cp_cpp
-NumericVector B_cp_cpp(const List& factorsList);
-RcppExport SEXP _BayesCoMET_B_cp_cpp(SEXP factorsListSEXP) {
+// cpB_cpp
+NumericVector cpB_cpp(const List& factorsList);
+RcppExport SEXP _BayesCoMET_cpB_cpp(SEXP factorsListSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const List& >::type factorsList(factorsListSEXP);
-    rcpp_result_gen = Rcpp::wrap(B_cp_cpp(factorsList));
+    rcpp_result_gen = Rcpp::wrap(cpB_cpp(factorsList));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_BayesCoMET_mode_matrix_cpp", (DL_FUNC) &_BayesCoMET_mode_matrix_cpp, 2},
+    {"_BayesCoMET_mode_matricize_cpp", (DL_FUNC) &_BayesCoMET_mode_matricize_cpp, 2},
     {"_BayesCoMET_revkronAll_cpp", (DL_FUNC) &_BayesCoMET_revkronAll_cpp, 1},
-    {"_BayesCoMET_LOOrevkron_cpp", (DL_FUNC) &_BayesCoMET_LOOrevkron_cpp, 2},
+    {"_BayesCoMET_revkronLOO_cpp", (DL_FUNC) &_BayesCoMET_revkronLOO_cpp, 2},
     {"_BayesCoMET_khatri_rao_comet_cpp", (DL_FUNC) &_BayesCoMET_khatri_rao_comet_cpp, 2},
-    {"_BayesCoMET_B_cp_cpp", (DL_FUNC) &_BayesCoMET_B_cp_cpp, 1},
+    {"_BayesCoMET_cpB_cpp", (DL_FUNC) &_BayesCoMET_cpB_cpp, 1},
     {NULL, NULL, 0}
 };
 

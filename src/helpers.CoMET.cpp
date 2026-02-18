@@ -8,7 +8,7 @@ using namespace arma;
 // A is a NumericVector with dim attribute (like an R array).
 // d denotes the mode index to be matricized.
 // [[Rcpp::export]]
-arma::mat mode_matrix_cpp(const NumericVector& A, const int d) {
+arma::mat mode_matricize_cpp(const NumericVector& A, const int d) {
     IntegerVector dims = A.attr("dim");
     const int n = dims.size();
     if(n < 2) stop("mode_matrix_cpp: input must be at least a 2-dimensional array.");
@@ -76,7 +76,7 @@ arma::mat revkronAll_cpp(const List& Glist) {
 // Returns G_n kronecker G_{d+1} kronecker G_{d-1} ... G_1 as an arma::mat
 // Glist is a list of n matrices and d is the mode index to be left out.
 // [[Rcpp::export]]
-arma::mat LOOrevkron_cpp(const List& Glist, const int d) {
+arma::mat revkronLOO_cpp(const List& Glist, const int d) {
     const int n = Glist.size();
     if(d < 1 || d > n) stop("LOOrevkron_cpp: invalid d.");
     
@@ -113,7 +113,7 @@ arma::mat khatri_rao_comet_cpp(const arma::mat& A, const arma::mat& B) {
 // factorsList: list of factor matrcies, each of dim pd x K
 // returns a NumericVector with dim attribute (tensor)
 // [[Rcpp::export]]
-NumericVector B_cp_cpp(const List& factorsList) {
+NumericVector cpB_cpp(const List& factorsList) {
     const int N = factorsList.size();
     if (N < 2) stop("B_cp_cpp: Need >= 2 factor matrices.");
     
@@ -166,5 +166,6 @@ NumericVector B_cp_cpp(const List& factorsList) {
     
     return out;
 }
+
 
 
