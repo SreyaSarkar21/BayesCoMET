@@ -2,14 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 mode_matrix_cpp <- function(A, d) {
-    .Call('_BayesCoMET_mode_matrix_cpp', PACKAGE = 'BayesCoMET', A, d)
+    .Call(`_BayesCoMET_mode_matrix_cpp`, A, d)
 }
 
 revkronAll_cpp <- function(Glist) {
-    .Call('_BayesCoMET_revkronAll_cpp', PACKAGE = 'BayesCoMET', Glist)
+    .Call(`_BayesCoMET_revkronAll_cpp`, Glist)
 }
 
 LOOrevkron_cpp <- function(Glist, d) {
-    .Call('_BayesCoMET_LOOrevkron_cpp', PACKAGE = 'BayesCoMET', Glist, d)
+    .Call(`_BayesCoMET_LOOrevkron_cpp`, Glist, d)
+}
+
+khatri_rao_comet_cpp <- function(A, B) {
+    .Call(`_BayesCoMET_khatri_rao_comet_cpp`, A, B)
+}
+
+B_cp_cpp <- function(factorsList) {
+    .Call(`_BayesCoMET_B_cp_cpp`, factorsList)
 }
 

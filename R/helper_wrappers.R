@@ -1,44 +1,44 @@
+#' @title mode_matrix
+#' @description mode-n matricization of a tensor
+#' @param A a numeric array with `dim` attribute.
+#' @param d integer, the mode index to be matricized.
+#' @return a matrix corresponding to the mode-\eqn{d} unfolding.
+#' @export
 mode_matrix <- function(A, d) {
     mode_matrix_cpp(A, d)
 }
 
-#### matching-columnwise Khatri-Rao product ####
-khatri_rao_cme <- function(A, B) {
-    stopifnot(ncol(A) == ncol(B))
-    K = matrix(NA, nrow(A) * nrow(B), ncol(A))
-    for(ii in 1:ncol(K)) {
-        K[, ii] <- kronecker(A[, ii], B[, ii])
-    }
-    K
+#' @title revkronAll
+#' @description Returns \eqn{G_n \otimes \dots G_1} for a list of n matrices.
+#' @param Glist a list of matrices
+#' @return a matrix yielding kronecker product in reverse order.
+#' @export
+revkronAll <- function(Glist) {
+    revkronAll_cpp(Glist)
+}
+
+#' @title LOOrevkron
+#' @description Returns \eqn{G_n \otimes G_{d+1} \otimes G_{d-1} \dots G_1}
+#' @param Glist a list of matrices
+#' @param d an integer denoting the mode to be left out.
+#' @return a matrix yielding kronecker product in reverse order.
+#' @export
+LOOrevkron <- function(Glist, d) {
+    LOOrevkron_cpp(Glist, d)
+}
+
+#' @title khatri_rao_comet
+#' @description matching-columnwise Khatri-Rao product
+#' @param A a matrix of dimensions \eqn{p_1 \times k}.
+#' @param B a matrix of dimensions \eqn{p_2 \times k}.
+#' @return a matrix of dimensions \eqn{p_1 p_2 \times k}.
+#' @export
+khatri_rao_comet <- function(A, B) {
+    khatri_rao_comet_cpp(A, B)
 }
 
 B_cp <- function(factorsList) {
-    N <- length(factorsList)  # Number of modes
-    dims <- sapply(factorsList, nrow)
-    K <- ncol(factorsList[[1]])
-    
-    # Check that all have the same number of columns
-    if (any(sapply(factorsList, ncol) != K)) {
-        stop("All factor matrices must have the same number of columns (i.e., rank K).")
-    }
-    
-    # Initialize output tensor
-    B <- array(0, dim = dims)
-    
-    for (r in 1:K) {
-        # Extract the r-th column vectors from each mode factor matrix
-        vecs <- lapply(factorsList, function(M) M[, r])
-        
-        # Build rank-1 component via successive outer products
-        rank1 <- vecs[[1]]
-        for (i in 2:N) {
-            rank1 <- outer(rank1, vecs[[i]])
-        }
-        
-        # Reshape and accumulate
-        B <- B + array(rank1, dim = dims)
-    }
-    B
+    B_cp_cpp(factorsList)
 }
 
 # #### Compute Khatri-Rao product of the factor matrices of B except dim-d ####
@@ -46,34 +46,24 @@ B_lookr <- function(B_list, d) {
     if (!is.list(B_list) || length(B_list) < 2) {
         stop("B_list must be a list of at least 2 matrices.")
     }
-    
+
     R_vals <- sapply(B_list, ncol)
     if (length(unique(R_vals)) != 1) {
         stop("All matrices in B_list must have the same number of columns.")
     }
-    
+
     # Get indices excluding d, in reverse order
     rev_indices <- rev(setdiff(seq_along(B_list), d))
-    
+
     # Start with the last matrix in the reversed order
     result <- B_list[[rev_indices[1]]]
-    
+
     # Iterate over the remaining indices in reverse order
     for (i in rev_indices[-1]) {
-        result <- khatri_rao_cme(result, B_list[[i]])
+        result <- khatri_rao_comet(result, B_list[[i]])
     }
     result
 }
-
-
-revkronAll <- function(Glist) {
-    revkronAll_cpp(Glist)
-}
-
-LOOrevkron <- function(Glist, d) {
-    LOOrevkron_cpp(Glist, d)
-}
-
 
 init_CP_factors <- function(beta_vec, pdims, K) {
     B <- array(beta_vec, dim = pdims)

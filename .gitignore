@@ -1,1 +1,21 @@
+# RStudio
 .Rproj.user
+
+# macOS junk
+.DS_Store
+
+# R session history
+.Rhistory
+.RData
+
+# R build artifacts
+*.Rproj
+
+# Compiled objects (already usually handled in src/.gitignore, but safe)
+*.o
+*.so
+*.dll
+
+# Temporary files
+*~
+
