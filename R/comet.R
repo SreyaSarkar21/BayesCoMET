@@ -2,9 +2,9 @@
 #'
 #' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
 #'
-#' @param yijs a vector containing the response for all the observations.
-#' @param xijlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
-#' @param zijlist a list, each component contains a tensor-valued random-effect covariate for each observation.
+#' @param y a vector containing the response for all the observations.
+#' @param xlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
+#' @param zlist a list, each component contains a tensor-valued random-effect covariate for each observation.
 #' @param mis a vector of cluster sizes.
 #' @param K a user-specified rank for CP structure of fixed-effect coefficient. Should not exceed the dimensions for matrix-valued covariates.
 #' @param kdims a vector of length \eqn{D} (number of tensor modes), where each element equals the \eqn{d}-th mode-specific compressed covariance dimension \eqn{k_d}.
@@ -29,19 +29,19 @@
 #' @export
 
 
-comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
+comet <- function(y, xlist, zlist, mis, K, kdims,
                   a0, b0, gammaVar0, R_list, S_list,
                   niter, nburn, nthin) {
 
     n <- length(mis) ## number of groups/clusters
     N <- sum(mis) ## total number of observations
-    pdims <- dim(xijlist[[1]]) ## fixed-effect tensor dimensions
-    qdims <- dim(zijlist[[1]]) ## random-effect tensor dimensions
+    pdims <- dim(xlist[[1]]) ## fixed-effect tensor dimensions
+    qdims <- dim(zlist[[1]]) ## random-effect tensor dimensions
     nmodes <- length(pdims) ## number of tensor modes
 
-    stopifnot(length(yijs) == N)
-    stopifnot(length(xijlist) == N)
-    stopifnot(length(zijlist) == N)
+    stopifnot(length(y) == N)
+    stopifnot(length(xlist) == N)
+    stopifnot(length(zlist) == N)
     if(nmodes == 2 & K > min(pdims)) {
         stop("`K` must be less than or equal to matrix dimensions.")
     }
@@ -76,32 +76,32 @@ comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
     delta2_list <- 1 / rgamma(K, shape = 0.5, rate = 1/xi_list)
 
     ### ridge-type initialization for fixed-effect coefficient B ###
-    x_rows <- lapply(xijlist, as.vector) ## Vectorize tensors X_ij's
+    x_rows <- lapply(xlist, as.vector) ## Vectorize tensors X_ij's
     x_mat <- do.call(rbind, x_rows)
     gram_mat <- crossprod(x_mat)
     # OLS or ridge-like estimate
-    beta_init <- chol2inv(chol(gram_mat + diag(1e-6, nrow(gram_mat)))) %*% crossprod(x_mat, yijs)
+    beta_init <- chol2inv(chol(gram_mat + diag(1e-6, nrow(gram_mat)))) %*% crossprod(x_mat, y)
     #message("Done beta_init")
     B <- array(beta_init, dim = pdims)
     B_factors <- init_CP_factors(beta_vec = beta_init, pdims = pdims, K = K)$U
     ###########################################################
 
     ### compute compressed random-effect tensor covariates \mathcal{\tilde Z}_{ij} ###
-    comp_zijlist <- vector("list", N)
+    comp_zlist <- vector("list", N)
     Skron_not1 <- revkronLOO(S_list, d = 1)
     for(ij in 1:N) {
-        zij_tilde_mode1 <- S_list[[1]] %*% tcrossprod(mode_matricize(zijlist[[ij]], d = 1), Skron_not1)
-        comp_zijlist[[ij]] <- array(zij_tilde_mode1, dim = kdims)
+        zij_tilde_mode1 <- S_list[[1]] %*% tcrossprod(mode_matricize(zlist[[ij]], d = 1), Skron_not1)
+        comp_zlist[[ij]] <- array(zij_tilde_mode1, dim = kdims)
     }
-    vec_comp_zijlist <- lapply(comp_zijlist,
+    vec_comp_zlist <- lapply(comp_zlist,
                                function(foo) {as.vector(foo)})
     zi_tilde_list <- lapply(1:n,
                             function(i) {
                                 rows_i <- mis_starts[i]:mis_cumsum[i]
-                                do.call("rbind", vec_comp_zijlist[rows_i])
+                                do.call("rbind", vec_comp_zlist[rows_i])
                             })
 
-    vecxijlist <- lapply(xijlist, as.vector)
+    vecxlist <- lapply(xlist, as.vector)
 
     RRtkron <- revkronAll(lapply(R_list, tcrossprod))
 
@@ -109,7 +109,7 @@ comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
     startTime <- proc.time()
     for(its in 1:niter) {
         if(its %% 1000 == 0) cat("iteration: ", its, "\n")
-        cycle1Samp <- cometCycle1(yijs = yijs, vecxijlist = vecxijlist, comp_zijlist = comp_zijlist,
+        cycle1Samp <- cometCycle1(y = y, vecxlist = vecxlist, comp_zlist = comp_zlist,
                                    zi_tilde_list = zi_tilde_list, mis = mis,
                                    B = B, errVar = errVar,
                                    Gamma_list = Gamma_list, Sigma_gamma_list = Sigma_gamma_list,
@@ -118,7 +118,7 @@ comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
         Gamma_list <- cycle1Samp$GammaSamplist
 
         Gkron <- revkronAll(Gamma_list)
-        cycle2Samp <- cometCycle2(yijs = yijs, xijlist = xijlist,
+        cycle2Samp <- cometCycle2(y = y, xlist = xlist,
                                    zi_tilde_list = zi_tilde_list,
                                    mis = mis,
                                    B_factors = B_factors, K = K,
@@ -156,5 +156,6 @@ comet <- function(yijs, xijlist, zijlist, mis, K, kdims,
 
     list(betaSamp = betaSamp, errVarSamp = errVarSamp,
          gammaSamplist = gammaSamplist,
+         ranefSamplist = cycle1Samp$Di_tilde,
          sampler_time = endTime - startTime)
 }

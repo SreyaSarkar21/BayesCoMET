@@ -16,7 +16,7 @@
 #' @return a list containing the following components:
 #' \describe{
 #' \item{GammaSamplist}{a list of \eqn{D} matrices each of dimension \eqn{k_d \times k_d}, denoting the updated compressed covariance parameters at a given iteration.}
-#' \item{Di_tilde}{an array of dimension \eqn{k_1 \times k_D}, denoting the imputed compressed random slope tensor at a given iteration. }
+#' \item{Di_tilde}{an array of dimension \eqn{k_1 \times \dots \times k_D}, denoting the imputed compressed random slope tensor at a given iteration. }
 #' }
 #' @importFrom stats rnorm
 
