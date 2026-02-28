@@ -65,7 +65,7 @@ cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
     ################# Given \tau^2, sample B in 3 steps #################
     for(d in 1:nmodes) {
         xmat_rowlist <- lapply(xijlist,
-                               function(foo) {as.vector(mode_matricize(foo, d) %*% khRaoBLOO(B_factors, d))})
+                               function(foo) {as.vector(mode_matricize(foo, d) %*% khaRaoLOO_B(B_factors, d))})
         xmat_list <- lapply(1:n,
                             function(i) {
                                 rows_i <- mis_starts[i]:mis_cumsum[i]
