@@ -52,7 +52,7 @@ cpB <- function(factorsList) {
 
 
 #### Computes Khatri-Rao product of the factor matrices of B except mode-d ####
-khRaoBLOO <- function(B_list, d) {
+khaRaoLOO_B <- function(B_list, d) {
     if (!is.list(B_list) || length(B_list) < 2) {
         stop("B_list must be a list of at least 2 matrices.")
     }
