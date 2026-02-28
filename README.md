@@ -86,7 +86,7 @@ res$sampler_time
 ```
 
     ##    user  system elapsed 
-    ##  48.056   1.412  49.345
+    ##  48.152   1.346  49.393
 
 ``` r
 betaPostMed <- apply(res$betaSamp, 2, median)
