@@ -76,7 +76,7 @@ betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 ```
 
-```{r visualize_betaSamps, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=2.8}
+```{r visualize_betaSamps, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=3.2}
 ### beta_73 ###
 # op <- par(no.readonly = TRUE)
 # on.exit(par(op), add = TRUE)
