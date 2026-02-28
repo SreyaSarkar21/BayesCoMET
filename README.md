@@ -85,49 +85,7 @@ betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 ```
 
-``` r
-### beta_73 ###
-op <- par(mfrow = c(1, 2))
-hist(res$betaSamp[, 73], freq = FALSE, col = "lightgrey", border = "black",
-     main = "", xlab = expression(beta[73]), ylab = "",
-     cex.lab = 0.85)
-abline(v = quantile(res$betaSamp[, 73], c(0.025, 0.975)), col = "magenta", lty = 2, lwd = 2)
-abline(v = quantile(res$betaSamp[, 73], 0.5), col = "blue", lty = 3, lwd = 2)
-abline(v = vecB_true[73], col = "red", lty = 1, lwd = 2)
-
-hist(res$betaSamp[, 1], freq = FALSE, col = "lightgrey", border = "black",
-     main = "", xlab = expression(beta[1]), ylab = "", yaxt = "n",
-     cex.lab = 0.85)
-abline(v = quantile(res$betaSamp[, 1], c(0.025, 0.975)), col = "magenta", lty = 2, lwd = 2)
-abline(v = quantile(res$betaSamp[, 1], 0.5), col = "blue", lty = 3, lwd = 2)
-abline(v = vecB_true[1], col = "red", lty = 1, lwd = 2)
-```
-
-![](README_files/figure-gfm/visualize_betaSamps-1.png)<!-- -->
-
-``` r
-# legend("topright",
-#        legend = c("2.5th and 97.5th percentiles", "Posterior Median", "True value"),
-#        col = c("magenta", "blue", "red"), lty = c(2, 3, 1), lwd = 2,
-#        bty = "n")
-par(mfrow = c(1,1))
-plot.new()
-legend("center",
-       legend = c("95% credible interval",
-                  "Posterior median",
-                  "True value"),
-       col = c("magenta", "blue", "red"),
-       lty = c(2, 3, 1),
-       lwd = 2,
-       horiz = TRUE,
-       bty = "n")
-```
-
-![](README_files/figure-gfm/visualize_betaSamps-2.png)<!-- -->
-
-``` r
-par(op)
-```
+![](README_files/figure-gfm/visualize_betaSamps-1.png)<!-- -->![](README_files/figure-gfm/visualize_betaSamps-2.png)<!-- -->
 
 ## Acknowledgement
 
