@@ -92,9 +92,9 @@ hist(res$betaSamp[, 1], freq = FALSE, col = "lightgrey", border = "black",
 abline(v = quantile(res$betaSamp[, 1], c(0.025, 0.975)), col = "magenta", lty = 2, lwd = 2)
 abline(v = quantile(res$betaSamp[, 1], 0.5), col = "blue", lty = 3, lwd = 2)
 abline(v = vecB_true[1], col = "red", lty = 1, lwd = 2)
-par(op)
-
-op <- par(mfrow = c(1,1))
+# par(op)
+# 
+# op <- par(mfrow = c(1,1))
 plot.new()
 legend("center",
        legend = c("95% credible interval",
