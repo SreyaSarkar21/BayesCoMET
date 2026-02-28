@@ -70,7 +70,7 @@ res <- BayesCoMET::comet(y = y_train, xlist = xlist_train, zlist = zlist_train,
                          mis = rep(n_train, m),
                          K = 6, kdims = kdims, a0 = 0.01, b0 = 0.01, gammaVar0 = c(1, 1),
                          R_list = R_list, S_list = S_list,
-                         niter = 11000, nburn = 1000, nthin = 1, store_ranef = TRUE)
+                         niter = 5000, nburn = 1000, nthin = 1, store_ranef = TRUE)
 
 ## Time taken ##
 res$sampler_time
@@ -78,7 +78,7 @@ res$sampler_time
 betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 
-vecB_true
+cbind(betaPostMed, vecB_true)
 ```
 
 ```{r visualize, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=3.2}
@@ -125,54 +125,54 @@ vecB_true
 ```
 
 ```{r visualize_betaSamps, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=4}
-library(dplyr)
-library(ggplot2)
-library(ggpubr)
-
-idx <- c("74", "1")
-niter <- 10000
-
-beta_df <- data.frame(
-  postsamp = c(res$betaSamp[, 74], res$betaSamp[, 1]),
-  betaidx  = factor(rep(idx, each = niter), levels = idx))
-
-bsumm_df <- data.frame(
-  q025 = c(quantile(res$betaSamp[, 74], 0.025), quantile(res$betaSamp[, 1], 0.025)),
-  q50 = c(median(res$betaSamp[, 74]), median(res$betaSamp[, 1])),
-  q975 = c(quantile(res$betaSamp[, 74], 0.975), quantile(res$betaSamp[, 1], 0.975)),
-  true = c(vecB_true[74], vecB_true[1]),
-  betaidx = factor(idx, levels = idx))
-
-make_hist <- function(bname) {
-  s <- filter(bsumm_df, betaidx == bname)
-
-  ggplot(filter(beta_df, betaidx == bname), aes(x = postsamp)) +
-    geom_histogram(aes(y = after_stat(density)),
-                   bins = 25, fill = "lightgrey", color = "black") +
-
-    # 95% CI (two dashed lines, same legend key via color)
-    geom_vline(aes(xintercept = s$q025, color = "95% CI"), linetype = 2, linewidth = 0.8) +
-    geom_vline(aes(xintercept = s$q975, color = "95% CI"), linetype = 2, linewidth = 0.8) +
-
-    # Posterior median (dotted)
-    geom_vline(aes(xintercept = s$q50, color = "Posterior median"), linetype = 3, linewidth = 0.9) +
-
-    # True value (solid)
-    geom_vline(aes(xintercept = s$true, color = "True value"), linetype = 1, linewidth = 0.9) +
-
-    labs(x = bquote(beta[.(bname)]), y = NULL) +
-    theme_bw() +
-    theme(
-      legend.position = "bottom",
-      plot.title = element_blank()
-    ) +
-    guides(color = guide_legend(title = NULL))
-}
-
-h1 <- make_hist("74")
-h2 <- make_hist("1")
-
-ggarrange(h1, h2, ncol = 2, common.legend = TRUE, legend = "bottom")
+# library(dplyr)
+# library(ggplot2)
+# library(ggpubr)
+# 
+# idx <- c("74", "1")
+# niter <- 10000
+# 
+# beta_df <- data.frame(
+#   postsamp = c(res$betaSamp[, 74], res$betaSamp[, 1]),
+#   betaidx  = factor(rep(idx, each = niter), levels = idx))
+# 
+# bsumm_df <- data.frame(
+#   q025 = c(quantile(res$betaSamp[, 74], 0.025), quantile(res$betaSamp[, 1], 0.025)),
+#   q50 = c(median(res$betaSamp[, 74]), median(res$betaSamp[, 1])),
+#   q975 = c(quantile(res$betaSamp[, 74], 0.975), quantile(res$betaSamp[, 1], 0.975)),
+#   true = c(vecB_true[74], vecB_true[1]),
+#   betaidx = factor(idx, levels = idx))
+# 
+# make_hist <- function(bname) {
+#   s <- filter(bsumm_df, betaidx == bname)
+# 
+#   ggplot(filter(beta_df, betaidx == bname), aes(x = postsamp)) +
+#     geom_histogram(aes(y = after_stat(density)),
+#                    bins = 25, fill = "lightgrey", color = "black") +
+# 
+#     # 95% CI (two dashed lines, same legend key via color)
+#     geom_vline(aes(xintercept = s$q025, color = "95% CI"), linetype = 2, linewidth = 0.8) +
+#     geom_vline(aes(xintercept = s$q975, color = "95% CI"), linetype = 2, linewidth = 0.8) +
+# 
+#     # Posterior median (dotted)
+#     geom_vline(aes(xintercept = s$q50, color = "Posterior median"), linetype = 3, linewidth = 0.9) +
+# 
+#     # True value (solid)
+#     geom_vline(aes(xintercept = s$true, color = "True value"), linetype = 1, linewidth = 0.9) +
+# 
+#     labs(x = bquote(beta[.(bname)]), y = NULL) +
+#     theme_bw() +
+#     theme(
+#       legend.position = "bottom",
+#       plot.title = element_blank()
+#     ) +
+#     guides(color = guide_legend(title = NULL))
+# }
+# 
+# h1 <- make_hist("74")
+# h2 <- make_hist("1")
+# 
+# ggarrange(h1, h2, ncol = 2, common.legend = TRUE, legend = "bottom")
 ```
 
 ## Acknowledgement
