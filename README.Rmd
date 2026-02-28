@@ -76,12 +76,14 @@ betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 ```
 
-```{r visualize_betaSamps, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=2.5}
+```{r visualize_betaSamps, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=2.8}
 ### beta_73 ###
-# op <- par(no.readonly = TRUE)
-# 
-# layout(matrix(c(1, 2, 3, 3), nrow = 2, byrow = TRUE), heights = c(1, 0.25))
-op <- par(mfrow = c(1, 2))
+op <- par(no.readonly = TRUE)
+on.exit(par(op), add = TRUE)
+
+layout(matrix(c(1, 2, 3, 3), nrow = 2, byrow = TRUE), heights = c(1, 0.18))
+# op <- par(mfrow = c(1, 2))
+par(mar = c(3, 1, 1, 1) + 0.1)
 hist(res$betaSamp[, 73], freq = FALSE, col = "lightgrey", border = "black",
      main = "", xlab = expression(beta[73]), ylab = "",
      cex.lab = 0.85)
@@ -89,6 +91,7 @@ abline(v = quantile(res$betaSamp[, 73], c(0.025, 0.975)), col = "magenta", lty =
 abline(v = quantile(res$betaSamp[, 73], 0.5), col = "blue", lty = 3, lwd = 2)
 abline(v = vecB_true[73], col = "red", lty = 1, lwd = 2)
 
+par(mar = c(3, 1, 1, 1) + 0.1)
 hist(res$betaSamp[, 1], freq = FALSE, col = "lightgrey", border = "black",
      main = "", xlab = expression(beta[1]), ylab = "", yaxt = "n",
      cex.lab = 0.85)
@@ -97,7 +100,7 @@ abline(v = quantile(res$betaSamp[, 1], 0.5), col = "blue", lty = 3, lwd = 2)
 abline(v = vecB_true[1], col = "red", lty = 1, lwd = 2)
 par(op)
 
-op <- par(mfrow = c(1,1))
+op <- par(mar = c(0, 0, 0, 0))
 plot.new()
 legend("center",
        legend = c("95% credible interval",
