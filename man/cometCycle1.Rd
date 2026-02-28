@@ -5,10 +5,10 @@
 \title{cometCycle1}
 \usage{
 cometCycle1(
-  yijs,
-  vecxijlist,
-  comp_zijlist,
-  zi_tilde_list,
+  y,
+  vecxlist,
+  comp_zlist,
+  z_tilde_list,
   mis,
   B,
   errVar,
@@ -19,13 +19,13 @@ cometCycle1(
 )
 }
 \arguments{
-\item{yijs}{a vector containing the response for all the observations.}
+\item{y}{a vector containing the response for all the observations.}
 
-\item{vecxijlist}{a list, each component contains the vectorized fixed-effect covariate for each observation.}
+\item{vecxlist}{a list, each component contains the vectorized fixed-effect covariate for each observation.}
 
-\item{comp_zijlist}{a list, each component contains the compressed random-effect covariate tensor \eqn{\tilde{\mathcal{Z}}} for each observation.}
+\item{comp_zlist}{a list, each component contains the compressed random-effect covariate tensor \eqn{\tilde{\mathcal{Z}}} for each observation.}
 
-\item{zi_tilde_list}{a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.}
+\item{z_tilde_list}{a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.}
 
 \item{mis}{a vector of cluster sizes.}
 
@@ -45,7 +45,7 @@ cometCycle1(
 a list containing the following components:
 \describe{
 \item{GammaSamplist}{a list of \eqn{D} matrices each of dimension \eqn{k_d \times k_d}, denoting the updated compressed covariance parameters at a given iteration.}
-\item{Di_tilde}{an array of dimension \eqn{k_1 \times k_D}, denoting the imputed compressed random slope tensor at a given iteration. }
+\item{Di_tilde}{an array of dimension \eqn{k_1 \times \dots \times k_D}, denoting the imputed compressed random slope tensor at a given iteration. }
 }
 }
 \description{

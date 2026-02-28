@@ -5,9 +5,9 @@
 \title{cometCycle2}
 \usage{
 cometCycle2(
-  yijs,
-  xijlist,
-  zi_tilde_list,
+  y,
+  xlist,
+  z_tilde_list,
   mis,
   B_factors,
   K,
@@ -23,11 +23,11 @@ cometCycle2(
 )
 }
 \arguments{
-\item{yijs}{a vector containing the response for all the observations.}
+\item{y}{a vector containing the response for all the observations.}
 
-\item{xijlist}{a list, each component contains a tensor-valued fixed-effect covariate for each observation.}
+\item{xlist}{a list, each component contains a tensor-valued fixed-effect covariate for each observation.}
 
-\item{zi_tilde_list}{a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.}
+\item{z_tilde_list}{a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.}
 
 \item{mis}{a vector of cluster sizes.}
 

@@ -16,6 +16,7 @@
 #' @param niter number of MCMC iterations.
 #' @param nburn number of burn-in samples.
 #' @param nthin thinning size specifying every nthin-th sample is retained.
+#' @param store_ranef logical; if TRUE, the imputed compressed random-effects are stored. Default value is FALSE.
 #' @return a list containing the following components:
 #' \describe{
 #' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p} columns containing posterior samples of fixed effect parameter \eqn{\beta}.}
@@ -31,7 +32,7 @@
 
 comet <- function(y, xlist, zlist, mis, K, kdims,
                   a0, b0, gammaVar0, R_list, S_list,
-                  niter, nburn, nthin) {
+                  niter, nburn, nthin, store_ranef = FALSE) {
 
     n <- length(mis) ## number of groups/clusters
     N <- sum(mis) ## total number of observations
@@ -95,7 +96,7 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
     }
     vec_comp_zlist <- lapply(comp_zlist,
                                function(foo) {as.vector(foo)})
-    zi_tilde_list <- lapply(1:n,
+    z_tilde_list <- lapply(1:n,
                             function(i) {
                                 rows_i <- mis_starts[i]:mis_cumsum[i]
                                 do.call("rbind", vec_comp_zlist[rows_i])
@@ -110,7 +111,7 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
     for(its in 1:niter) {
         if(its %% 1000 == 0) cat("iteration: ", its, "\n")
         cycle1Samp <- cometCycle1(y = y, vecxlist = vecxlist, comp_zlist = comp_zlist,
-                                   zi_tilde_list = zi_tilde_list, mis = mis,
+                                   z_tilde_list = z_tilde_list, mis = mis,
                                    B = B, errVar = errVar,
                                    Gamma_list = Gamma_list, Sigma_gamma_list = Sigma_gamma_list,
                                    kdims = kdims, RRtkron = RRtkron)
@@ -119,7 +120,7 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
 
         Gkron <- revkronAll(Gamma_list)
         cycle2Samp <- cometCycle2(y = y, xlist = xlist,
-                                   zi_tilde_list = zi_tilde_list,
+                                   z_tilde_list = z_tilde_list,
                                    mis = mis,
                                    B_factors = B_factors, K = K,
                                    a0 = a0, b0 = b0, errVar = errVar,
@@ -154,8 +155,15 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
     }
     endTime <- proc.time()
 
-    list(betaSamp = betaSamp, errVarSamp = errVarSamp,
-         gammaSamplist = gammaSamplist,
-         ranefSamplist = cycle1Samp$Di_tilde,
-         sampler_time = endTime - startTime)
+    if(store_ranef) {
+        list(betaSamp = betaSamp, errVarSamp = errVarSamp,
+             gammaSamplist = gammaSamplist,
+             ranefSamplist = cycle1Samp$Di_tilde,
+             sampler_time = endTime - startTime)
+    } else {
+        list(betaSamp = betaSamp, errVarSamp = errVarSamp,
+             gammaSamplist = gammaSamplist,
+             sampler_time = endTime - startTime)
+    }
+
 }

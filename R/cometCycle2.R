@@ -2,9 +2,9 @@
 #'
 #' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
 #'
-#' @param yijs a vector containing the response for all the observations.
-#' @param xijlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
-#' @param zi_tilde_list a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.
+#' @param y a vector containing the response for all the observations.
+#' @param xlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
+#' @param z_tilde_list a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.
 #' @param mis a vector of cluster sizes.
 #' @param B_factors fixed-effect factor matrices sampled in previous iteration.
 #' @param K a user-specified CP rank of fixed-effect coefficient \eqn{\mathcal{B}}. Should not exceed the dimensions for matrix-valued covariates.
@@ -29,13 +29,13 @@
 #' }
 #' @importFrom stats rnorm rgamma
 
-cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
+cometCycle2 <- function(y, xlist, z_tilde_list, mis,
                          B_factors, K, a0, b0,
                          errVar, lambda2_list, delta2_list, nu_list, xi_list,
                          Gkron, RRtkron) {
 
     n <- length(mis); N <- sum(mis)
-    pdims <- dim(xijlist[[1]])
+    pdims <- dim(xlist[[1]])
     nmodes <- length(pdims)
     mis_cumsum <- cumsum(mis)
     mis_starts <- c(1, mis_cumsum[-length(mis)] + 1)
@@ -43,7 +43,7 @@ cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
     ######################## Marginalization ########################
     margVari <- vector("list", n)
     for(i in 1:n) {
-        margVari[[i]] <- zi_tilde_list[[i]] %*% Gkron %*% RRtkron %*% crossprod(Gkron, t(zi_tilde_list[[i]])) + diag(1, mis[i])
+        margVari[[i]] <- z_tilde_list[[i]] %*% Gkron %*% RRtkron %*% crossprod(Gkron, t(z_tilde_list[[i]])) + diag(1, mis[i])
     }
     margVari_svd <- lapply(margVari, svd)
     margVari_inv_half <- vector("list", n)
@@ -57,14 +57,14 @@ cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
     ylist <- lapply(1:n,
                     function(i) {
                         rows_i <- mis_starts[i]:mis_cumsum[i]
-                        margVari_inv_half[[i]] %*% yijs[rows_i]
+                        margVari_inv_half[[i]] %*% y[rows_i]
                     })
     yvec <- as.matrix(unlist(ylist))
     ########################################################################
 
     ################# Given \tau^2, sample B in 3 steps #################
     for(d in 1:nmodes) {
-        xmat_rowlist <- lapply(xijlist,
+        xmat_rowlist <- lapply(xlist,
                                function(foo) {as.vector(mode_matricize(foo, d) %*% khaRaoLOO_B(B_factors, d))})
         xmat_list <- lapply(1:n,
                             function(i) {
@@ -103,7 +103,7 @@ cometCycle2 <- function(yijs, xijlist, zi_tilde_list, mis,
     xi_list <- 1 / rgamma(K, shape = 1, rate = 1 + 1 / delta2_list)
 
     ################# Given updated B, sample \tau^2 #################
-    xijB_list <- lapply(xijlist,
+    xijB_list <- lapply(xlist,
                         function(foo) {sum(as.vector(foo) * as.vector(B))})
     mu_list <- lapply(1:n,
                       function(i) {

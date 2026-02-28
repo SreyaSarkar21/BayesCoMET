@@ -2,10 +2,10 @@
 #'
 #' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
 #'
-#' @param yijs a vector containing the response for all the observations.
-#' @param vecxijlist a list, each component contains the vectorized fixed-effect covariate for each observation.
-#' @param comp_zijlist a list, each component contains the compressed random-effect covariate tensor \eqn{\tilde{\mathcal{Z}}} for each observation.
-#' @param zi_tilde_list a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.
+#' @param y a vector containing the response for all the observations.
+#' @param vecxlist a list, each component contains the vectorized fixed-effect covariate for each observation.
+#' @param comp_zlist a list, each component contains the compressed random-effect covariate tensor \eqn{\tilde{\mathcal{Z}}} for each observation.
+#' @param z_tilde_list a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.
 #' @param mis a vector of cluster sizes.
 #' @param B \eqn{\mathcal{B}} sampled in previous iteration.
 #' @param errVar \eqn{\tau^2} sampled in previous iteration.
@@ -20,7 +20,7 @@
 #' }
 #' @importFrom stats rnorm
 
-cometCycle1 <- function(yijs, vecxijlist, comp_zijlist, zi_tilde_list, mis,
+cometCycle1 <- function(y, vecxlist, comp_zlist, z_tilde_list, mis,
                          B, errVar,
                          Gamma_list, Sigma_gamma_list, kdims, RRtkron) {
 
@@ -30,7 +30,7 @@ cometCycle1 <- function(yijs, vecxijlist, comp_zijlist, zi_tilde_list, mis,
     nmodes <- length(kdims)
 
     #### calculate residuals given B
-    check_y <- vapply(seq_len(N), function(ij) {yijs[ij] - sum(vecxijlist[[ij]] * as.vector(B))}, 0.0)
+    check_y <- vapply(seq_len(N), function(ij) {y[ij] - sum(vecxlist[[ij]] * as.vector(B))}, 0.0)
     check_ylist <- lapply(seq_len(n), function(i) {rows_i <- mis_starts[i]:mis_cumsum[i]; check_y[rows_i]})
 
     #### Impute compressed random slopes \tilde D_i ####
@@ -38,8 +38,8 @@ cometCycle1 <- function(yijs, vecxijlist, comp_zijlist, zi_tilde_list, mis,
     Di_tilde <- vector("list", n)
     Gkron <- revkronAll(Gamma_list)
     for (i in 1:n) {
-        Vyd <- errVar * zi_tilde_list[[i]] %*% Gkron %*% RRtkron
-        VyyInv <- chol2inv(chol(Vyd %*% crossprod(Gkron, t(zi_tilde_list[[i]])) + errVar * diag(1, nrow(zi_tilde_list[[i]]))))
+        Vyd <- errVar * z_tilde_list[[i]] %*% Gkron %*% RRtkron
+        VyyInv <- chol2inv(chol(Vyd %*% crossprod(Gkron, t(z_tilde_list[[i]])) + errVar * diag(1, nrow(z_tilde_list[[i]]))))
         VydTvyyInv <- crossprod(Vyd, VyyInv)
         postRanVar <- errVar * RRtkron - drop(VydTvyyInv %*% Vyd)
         postRanMean <- drop(VydTvyyInv %*% check_ylist[[i]])
@@ -52,7 +52,7 @@ cometCycle1 <- function(yijs, vecxijlist, comp_zijlist, zi_tilde_list, mis,
         check_z_gamma_groups <- vector("list", n)
         for(i in 1:n) {
             rows_i <- mis_starts[i]:mis_cumsum[i]
-            check_z_gamma_groups[[i]]  <- do.call("rbind", lapply(comp_zijlist[rows_i],
+            check_z_gamma_groups[[i]]  <- do.call("rbind", lapply(comp_zlist[rows_i],
                                                                   function(foo) {as.vector(mode_matricize(foo, d) %*% tcrossprod(revkronLOO(Gamma_list, d), mode_matricize(Di_tilde[[i]], d)))}))
         }
         check_z_gamma <- do.call("rbind", check_z_gamma_groups)

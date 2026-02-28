@@ -5,9 +5,9 @@
 \title{comet}
 \usage{
 comet(
-  yijs,
-  xijlist,
-  zijlist,
+  y,
+  xlist,
+  zlist,
   mis,
   K,
   kdims,
@@ -18,15 +18,16 @@ comet(
   S_list,
   niter,
   nburn,
-  nthin
+  nthin,
+  store_ranef = FALSE
 )
 }
 \arguments{
-\item{yijs}{a vector containing the response for all the observations.}
+\item{y}{a vector containing the response for all the observations.}
 
-\item{xijlist}{a list, each component contains a tensor-valued fixed-effect covariate for each observation.}
+\item{xlist}{a list, each component contains a tensor-valued fixed-effect covariate for each observation.}
 
-\item{zijlist}{a list, each component contains a tensor-valued random-effect covariate for each observation.}
+\item{zlist}{a list, each component contains a tensor-valued random-effect covariate for each observation.}
 
 \item{mis}{a vector of cluster sizes.}
 
@@ -49,6 +50,8 @@ comet(
 \item{nburn}{number of burn-in samples.}
 
 \item{nthin}{thinning size specifying every nthin-th sample is retained.}
+
+\item{store_ranef}{logical; if TRUE, the imputed compressed random-effects are stored. Default value is FALSE.}
 }
 \value{
 a list containing the following components:
