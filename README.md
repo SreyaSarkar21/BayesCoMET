@@ -85,7 +85,7 @@ betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 ```
 
-![](README_files/figure-gfm/visualize_betaSamps-1.png)<!-- -->![](README_files/figure-gfm/visualize_betaSamps-2.png)<!-- -->
+![](README_files/figure-gfm/visualize_betaSamps-1.png)<!-- -->
 
 ## Acknowledgement
 
