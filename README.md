@@ -81,6 +81,14 @@ res <- BayesCoMET::comet(y = y_train, xlist = xlist_train, zlist = zlist_train,
     ## iteration:  1000
 
 ``` r
+## Time taken ##
+res$sampler_time
+```
+
+    ##    user  system elapsed 
+    ##  48.056   1.412  49.345
+
+``` r
 betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 ```
