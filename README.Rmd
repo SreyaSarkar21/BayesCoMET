@@ -93,7 +93,7 @@ abline(v = quantile(res$betaSamp[, 73], c(0.025, 0.975)), col = "magenta", lty =
 abline(v = betaPostMed[73], col = "blue", lty = 3, lwd = 2)
 abline(v = vecB_true[73], col = "red", lty = 1, lwd = 2)
 
-legend("topright",
+legend(x = 4.5, y = 1,
        legend = c("95% credible interval",
                   "Posterior median",
                   "True value"),
