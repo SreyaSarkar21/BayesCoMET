@@ -78,51 +78,8 @@ res$sampler_time
 betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 
-cbind(betaPostMed, vecB_true)
 ```
 
-```{r visualize, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=3.2}
-# library(dplyr)
-# library(ggplot2)
-# 
-# idx <- c("73", "1")
-# beta_df <- data.frame(postsamp = c(res$betaSamp[, 73], res$betaSamp[, 1]),
-#                       betaidx = factor(rep(idx, each = 10000), levels = idx))
-# bsumm_df <- data.frame(q025 = c(quantile(res$betaSamp[, 73], 0.025), quantile(res$betaSamp[, 1], 0.025)),
-#                        q50 = c(betaPostMed[73], betaPostMed[1]),
-#                        q975 = c(quantile(res$betaSamp[, 73], 0.975), quantile(res$betaSamp[, 1], 0.975)),
-#                        true = c(vecB_true[73], vecB_true[1]),
-#                        betaidx = factor(idx, levels = idx))
-# 
-# make_hist <- function(bname) {
-# ggplot(filter(beta_df, betaidx == bname), aes(x = postsamp)) +
-#     geom_histogram(aes(y = after_stat(density)),
-#                    bins = 25, fill = "lightgrey", color = "black") +
-#     geom_vline(data = filter(bsumm_df, betaidx == bname),
-#                aes(xintercept = q025, linetype = 2, color = "95% CI"),
-#                linewidth = 0.8) +
-#     geom_vline(data = filter(bsumm_df, betaidx == bname),
-#                aes(xintercept = q975, linetype = 2, color = "95% CI"),
-#                linewidth = 0.8) +
-#     geom_vline(data = filter(bsumm_df, betaidx == bname),
-#                aes(xintercept = q50, linetype = 2, color = "Posterior median"),
-#                linewidth = 0.9) +
-#     geom_vline(data = filter(bsumm_df, betaidx == bname),
-#                aes(xintercept = true, linetype = 1, color = "True value"),
-#                linewidth = 0.9) +
-#     labs(x = gsub("_", "", bname), y = NULL) +
-#     theme_bw() +
-#     theme(legend.position = "bottom",
-#       plot.title = element_blank()) +
-#     guides(color = guide_legend(title = NULL))
-# }
-# 
-# h1 <- make_hist("73")
-# h2 <- make_hist("1")
-# 
-# library(ggpubr)
-# ggarrange(h1, h2, ncol = 2, widths = c(1, 1), common.legend = TRUE, legend = "bottom")
-```
 
 ```{r visualize_betaSamps, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=4}
 # library(dplyr)
