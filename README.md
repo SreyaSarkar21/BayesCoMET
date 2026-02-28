@@ -73,15 +73,22 @@ S_list <- lapply(1:nmodes, function(d) {matrix(rnorm(kdims[d] * qdims[d], 0, sd 
 
 res <- BayesCoMET::comet(y = y_train, xlist = xlist_train, zlist = zlist_train,
                          mis = rep(n_train, m),
-                         K = 4, kdims = kdims, a0 = 0.01, b0 = 0.01, gammaVar0 = c(1, 1),
+                         K = 6, kdims = kdims, a0 = 0.01, b0 = 0.01, gammaVar0 = c(1, 1),
                          R_list = R_list, S_list = S_list,
-                         niter = 4000, nburn = 1000, nthin = 1, store_ranef = TRUE)
+                         niter = 11000, nburn = 1000, nthin = 1, store_ranef = TRUE)
 ```
 
     ## iteration:  1000 
     ## iteration:  2000 
     ## iteration:  3000 
-    ## iteration:  4000
+    ## iteration:  4000 
+    ## iteration:  5000 
+    ## iteration:  6000 
+    ## iteration:  7000 
+    ## iteration:  8000 
+    ## iteration:  9000 
+    ## iteration:  10000 
+    ## iteration:  11000
 
 ``` r
 betaPostMed <- apply(res$betaSamp, 2, median)
@@ -91,46 +98,27 @@ vecB_true <- as.vector(trueB)
 ``` r
 ### beta_73 ###
 op <- par(mfrow = c(1, 2))
-plot(ts(res$betaSamp[, 73]), main = paste0("Posterior samples of beta_", 73),
-     ylab = paste0("beta_", 73),
-     xlab = paste0("iteration"))
-abline(h = vecB_true[73], col = "red", lwd = 2)
-hist(res$betaSamp[, 73], freq = FALSE, col = "skyblue", border = "black",
+hist(res$betaSamp[, 73], freq = FALSE, col = "lightgrey", border = "black",
      main = "", xlab = expression(beta[73]), ylab = "",
      cex.lab = 0.85)
 abline(v = quantile(res$betaSamp[, 73], c(0.025, 0.975)), col = "magenta", lty = 2, lwd = 2)
+abline(v = quantile(res$betaSamp[, 73], 0.5), col = "blue", lty = 3, lwd = 2)
 abline(v = vecB_true[73], col = "red", lty = 1, lwd = 2)
-legend("bottom",
-       legend = c("2.5th and 97.5th percentiles", "True value"),
-       col = c("magenta", "red"), lty = c(2, 1), lwd = 2,
-       horiz = TRUE, bty = "n", xjust = 0.5)
-```
 
-![](README_files/figure-gfm/visualize_MargPred-1.png)<!-- -->
-
-``` r
-par(op)
-
-
-### beta_1 ###
-op <- par(mfrow = c(1, 2))
-plot(ts(res$betaSamp[, 1]), main = paste0("Posterior samples of beta_", 1),
-     ylab = paste0("beta_", 1),
-     xlab = paste0("iteration"))
-abline(h = vecB_true[1], col = "red", lwd = 2)
-hist(res$betaSamp[, 1], freq = FALSE, col = "skyblue", border = "black",
+hist(res$betaSamp[, 1], freq = FALSE, col = "lightgrey", border = "black",
      main = "", xlab = expression(beta[1]), ylab = "", yaxt = "n",
      cex.lab = 0.85)
 abline(v = quantile(res$betaSamp[, 1], c(0.025, 0.975)), col = "magenta", lty = 2, lwd = 2)
+abline(v = quantile(res$betaSamp[, 1], 0.5), col = "blue", lty = 3, lwd = 2)
 abline(v = vecB_true[1], col = "red", lty = 1, lwd = 2)
 
-legend("bottom",
-       legend = c("2.5th and 97.5th percentiles", "True value"),
-       col = c("magenta", "red"), lty = c(2, 1), lwd = 2,
-       horiz = TRUE, bty = "n", xjust = 0.5)
+legend("topright",
+       legend = c("2.5th and 97.5th percentiles", "Posterior Median", "True value"),
+       col = c("magenta", "blue", "red"), lty = c(2, 3, 1), lwd = 2,
+       bty = "n")
 ```
 
-![](README_files/figure-gfm/visualize_MargPred-2.png)<!-- -->
+![](README_files/figure-gfm/visualize_betaSamps-1.png)<!-- -->
 
 ``` r
 par(op)
