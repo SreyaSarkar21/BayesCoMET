@@ -70,7 +70,7 @@ res <- BayesCoMET::comet(y = y_train, xlist = xlist_train, zlist = zlist_train,
                          mis = rep(n_train, m),
                          K = 6, kdims = kdims, a0 = 0.01, b0 = 0.01, gammaVar0 = c(1, 1),
                          R_list = R_list, S_list = S_list,
-                         niter = 1100, nburn = 100, nthin = 1, store_ranef = TRUE)
+                         niter = 11000, nburn = 1000, nthin = 1, store_ranef = TRUE)
 
 ## Time taken ##
 res$sampler_time
@@ -78,6 +78,7 @@ res$sampler_time
 betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
 
+vecB_true
 ```
 
 ```{r visualize, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=3.2}
