@@ -82,16 +82,26 @@ vecB_true <- as.vector(trueB)
 # on.exit(par(op), add = TRUE)
 # 
 # layout(matrix(c(1, 2, 3, 3), nrow = 2, byrow = TRUE), heights = c(1, 0.18))
-# op <- par(mfrow = c(1, 2))
+op <- par(mfrow = c(1, 2))
 # par(mar = c(3, 1, 1, 1) + 0.1)
-op <- par(no.readonly = TRUE)
-par(mfrow = c(1, 2), xpd = NA)
+# op <- par(no.readonly = TRUE)
+# par(mfrow = c(1, 2), xpd = NA)
 hist(res$betaSamp[, 73], freq = FALSE, col = "lightgrey", border = "black",
      main = "", xlab = expression(beta[73]), ylab = "",
      cex.lab = 0.85)
 abline(v = quantile(res$betaSamp[, 73], c(0.025, 0.975)), col = "magenta", lty = 2, lwd = 2)
-abline(v = quantile(res$betaSamp[, 73], 0.5), col = "blue", lty = 3, lwd = 2)
+abline(v = betaPostMed[73], col = "blue", lty = 3, lwd = 2)
 abline(v = vecB_true[73], col = "red", lty = 1, lwd = 2)
+
+legend("topright",
+       legend = c("95% credible interval",
+                  "Posterior median",
+                  "True value"),
+       col = c("magenta", "blue", "red"),
+       lty = c(2, 3, 1),
+       lwd = 2,
+       horiz = TRUE,
+       bty = "n")
 
 # par(mar = c(3, 1, 1, 1) + 0.1)
 hist(res$betaSamp[, 1], freq = FALSE, col = "lightgrey", border = "black",
@@ -104,15 +114,7 @@ abline(v = vecB_true[1], col = "red", lty = 1, lwd = 2)
 
 # op <- par(mar = c(0, 0, 0, 0))
 # plot.new()
-legend(x = 6.5, y = 0.4,
-       legend = c("95% credible interval",
-                  "Posterior median",
-                  "True value"),
-       col = c("magenta", "blue", "red"),
-       lty = c(2, 3, 1),
-       lwd = 2,
-       horiz = TRUE,
-       bty = "n")
+
 par(op)
 ```
 
