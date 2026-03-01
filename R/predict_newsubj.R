@@ -19,6 +19,7 @@
 #' \item{upper_pi}{upper limits of the prediction intervals.}
 #' }
 #' @importFrom stats rnorm quantile
+#' @export
 
 predict_newsubj <- function(object, kdims, R_list, S_list,
                               y_test, xlist_test, zlist_test, mis, nom.level) {
