@@ -59,6 +59,7 @@ a list containing the following components:
 \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p} columns containing posterior samples of fixed effect parameter \eqn{\beta}.}
 \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
 \item{gammaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_1 k_2} columns containing posterior samples of columnwise vectorization of the compressed covariance parameter \eqn{\Gamma}.}
+\item{ranefSamplist}{a list of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}}, containing the imputed vectorized compressed random-effects. Returned only when store_ranef = TRUE.}
 \item{sampler_time}{time taken by the sampler to run.}
 }
 }

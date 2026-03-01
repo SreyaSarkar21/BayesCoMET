@@ -65,5 +65,5 @@ cometCycle1 <- function(y, vecxlist, comp_zlist, z_tilde_list, mis,
         Gamma_list[[d]] <- matrix(gammaSamp, kdims[d], kdims[d])
     }
 
-    list(GammaSamplist = Gamma_list, Di_tilde = Di_tilde)
+    list(GammaSamplist = Gamma_list, vecDi_tilde = di)
 }

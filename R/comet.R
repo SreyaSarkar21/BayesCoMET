@@ -22,6 +22,7 @@
 #' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p} columns containing posterior samples of fixed effect parameter \eqn{\beta}.}
 #' \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
 #' \item{gammaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_1 k_2} columns containing posterior samples of columnwise vectorization of the compressed covariance parameter \eqn{\Gamma}.}
+#' \item{ranefSamplist}{a list of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}}, containing the imputed vectorized compressed random-effects. Returned only when store_ranef = TRUE.}
 #' \item{sampler_time}{time taken by the sampler to run.}
 #' }
 #' @import Matrix
@@ -66,6 +67,7 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
     nuSamplist <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, pdims[d] * K)})
     xiSamp <- matrix(NA, (niter - nburn) / nthin, K)
     gammaSamplist <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, kdims[d] * kdims[d])}) ## vectorized compressed covariance parameters
+    ranefSamplist <- vector("list", (niter - nburn) / nthin)
     #############################################################
 
     ####################### Initialization ######################
@@ -151,6 +153,10 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
             errVarSamp[cts] <- cycle2Samp$errVarSamp
             delta2Samp[cts, ] <- cycle2Samp$delta2Samplist
             xiSamp[cts, ] <- cycle2Samp$xiSamp
+
+            if(store_ranef) {
+                ranefSamplist[[cts]] <- cycle1Samp$vecDi_tilde
+            }
         }
     }
     endTime <- proc.time()
@@ -158,7 +164,7 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
     if(store_ranef) {
         list(betaSamp = betaSamp, errVarSamp = errVarSamp,
              gammaSamplist = gammaSamplist,
-             ranefSamplist = cycle1Samp$Di_tilde,
+             ranefSamplist = ranefSamplist,
              sampler_time = endTime - startTime)
     } else {
         list(betaSamp = betaSamp, errVarSamp = errVarSamp,
