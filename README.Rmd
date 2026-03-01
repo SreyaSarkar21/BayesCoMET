@@ -25,11 +25,8 @@ This repositary contains:
 ## Example Implementation of CoMET
 
 ```{r MargPred, message=FALSE, warning=FALSE}
-library(BayesCoMET)
 pdims <- qdims <- c(32, 32)
 n_train <- 100; n_test <- 50; m <- 9 ## 9 observations per subject
-
-library(BayesCoMET)
 
 ## Generating a  CP-structured fixed-effect coefficient
 cp_decomp_B <- BayesCoMET:::generate_cpB_with_sparse_factors(pdims = c(32, 32), K = 4,
@@ -77,17 +74,10 @@ res$sampler_time / 60
 
 betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
-
-pred_res <- BayesCoMET::predict_newsubj(object = res, kdims = kdims,
-                                        R_list = R_list, S_list = S_list,
-                                        y_test = y_test, xlist_test = xlist_test,
-                                        zlist_test = zlist_test,
-                                        mis = rep(m, times = n_test), nom.level = 0.95)
-
 ```
 
 
-```{r visualize_betaSamps, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=4}
+```{r visualize_betaSamps, echo = FALSE, message=FALSE, warning=FALSE, fig.width=8.3, fig.height=5}
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
@@ -113,14 +103,14 @@ make_hist <- function(bname) {
     geom_histogram(aes(y = after_stat(density)),
                    bins = 25, fill = "lightgrey", color = "black") +
 
-    # 95% CI (two dashed lines, same legend key via color)
+    # 95% CI
     geom_vline(aes(xintercept = s$q025, color = "95% CI"), linetype = 2, linewidth = 0.8) +
     geom_vline(aes(xintercept = s$q975, color = "95% CI"), linetype = 2, linewidth = 0.8) +
 
-    # Posterior median (dotted)
+    # Posterior median
     geom_vline(aes(xintercept = s$q50, color = "Posterior median"), linetype = 3, linewidth = 0.9) +
 
-    # True value (solid)
+    # True value
     geom_vline(aes(xintercept = s$true, color = "True value"), linetype = 1, linewidth = 0.9) +
 
     labs(x = bquote(beta[.(bname)]), y = "Density") +
@@ -140,7 +130,17 @@ fig_beta <- annotate_figure(fig_beta, top = text_grob("Histogram of Posterior Sa
 fig_beta
 ```
 
-```{r visualize_ySamps, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=4}
+```{r predictNewSubj, message=FALSE, warning=FALSE}
+pred_res <- BayesCoMET::predict_newsubj(object = res, kdims = kdims,
+                                        R_list = R_list, S_list = S_list,
+                                        y_test = y_test, xlist_test = xlist_test,
+                                        zlist_test = zlist_test,
+                                        mis = rep(m, times = n_test), nom.level = 0.95)
+```
+
+
+
+```{r visualize_ySamps, message=FALSE, warning=FALSE, fig.width=8, fig.height=5}
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
@@ -166,14 +166,14 @@ make_hist <- function(bname) {
     geom_histogram(aes(y = after_stat(density)),
                    bins = 25, fill = "lightgrey", color = "black") +
 
-    # 95% CI (two dashed lines, same legend key via color)
+    # 95% CI
     geom_vline(aes(xintercept = s$q025, color = "95% CI"), linetype = 2, linewidth = 0.8) +
     geom_vline(aes(xintercept = s$q975, color = "95% CI"), linetype = 2, linewidth = 0.8) +
 
-    # Posterior mean (dotted)
+    # Posterior median
     geom_vline(aes(xintercept = s$q50, color = "Posterior median"), linetype = 3, linewidth = 0.9) +
 
-    # True value (solid)
+    # True value
     geom_vline(aes(xintercept = s$true, color = "True value"), linetype = 1, linewidth = 0.9) +
 
     labs(x = bquote(y[.(bname)]^{plain(new)}), y = "Density") +
@@ -195,8 +195,6 @@ fig_pred
 
 
 
-
-
 ## Acknowledgement
 
 Sreya Sarkar was supported by the National Science Foundation grant DMS-1854667 for this work.
@@ -204,7 +202,7 @@ Sreya Sarkar was supported by the National Science Foundation grant DMS-1854667 
 
 ## Citation
 
-If you use *BayesCoMET* in your work, please cite:
+If you use **BayesCoMET** in your work, please cite:
 Sarkar, S., Khare, K., & Srivastava, S. (2026). **CoMET: A Compressed Bayesian Mixed-Effects Model for High-Dimensional Tensors.** *arXiv.* [https://arxiv.org/pdf/2602.19236](https://arxiv.org/pdf/2602.19236)
 
 

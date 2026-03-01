@@ -30,11 +30,8 @@ This repositary contains:
 ## Example Implementation of CoMET
 
 ``` r
-library(BayesCoMET)
 pdims <- qdims <- c(32, 32)
 n_train <- 100; n_test <- 50; m <- 9 ## 9 observations per subject
-
-library(BayesCoMET)
 
 ## Generating a  CP-structured fixed-effect coefficient
 cp_decomp_B <- BayesCoMET:::generate_cpB_with_sparse_factors(pdims = c(32, 32), K = 4,
@@ -96,12 +93,16 @@ res$sampler_time / 60
 ```
 
     ##       user     system    elapsed 
-    ## 23.0775500  0.4233833 23.5230500
+    ## 23.3302833  0.4356833 23.9008833
 
 ``` r
 betaPostMed <- apply(res$betaSamp, 2, median)
 vecB_true <- as.vector(trueB)
+```
 
+![](README_files/figure-gfm/visualize_betaSamps-1.png)<!-- -->
+
+``` r
 pred_res <- BayesCoMET::predict_newsubj(object = res, kdims = kdims,
                                         R_list = R_list, S_list = S_list,
                                         y_test = y_test, xlist_test = xlist_test,
@@ -109,7 +110,58 @@ pred_res <- BayesCoMET::predict_newsubj(object = res, kdims = kdims,
                                         mis = rep(m, times = n_test), nom.level = 0.95)
 ```
 
-![](README_files/figure-gfm/visualize_betaSamps-1.png)<!-- -->
+``` r
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+
+idx <- c("11", "12")
+niter <- 10000
+
+y_df <- data.frame(
+  postsamp = c(pred_res$yhat_samples[[1]][1, ], pred_res$yhat_samples[[1]][2, ]),
+  yidx  = factor(rep(idx, each = niter), levels = idx))
+
+ysumm_df <- data.frame(
+  q025 = c(pred_res$lower_pi[[1]][1], pred_res$lower_pi[[1]][2]),
+  q50 = c(quantile(pred_res$yhat_samples[[1]][1, ], 0.50), quantile(pred_res$yhat_samples[[1]][2, ], 0.50)),
+  q975 = c(pred_res$upper_pi[[1]][1], pred_res$upper_pi[[1]][2]),
+  true = c(y_test[1], y_test[2]),
+  yidx = factor(idx, levels = idx))
+
+make_hist <- function(bname) {
+  s <- filter(ysumm_df, yidx == bname)
+
+  ggplot(filter(y_df, yidx == bname), aes(x = postsamp)) +
+    geom_histogram(aes(y = after_stat(density)),
+                   bins = 25, fill = "lightgrey", color = "black") +
+
+    # 95% CI
+    geom_vline(aes(xintercept = s$q025, color = "95% CI"), linetype = 2, linewidth = 0.8) +
+    geom_vline(aes(xintercept = s$q975, color = "95% CI"), linetype = 2, linewidth = 0.8) +
+
+    # Posterior median
+    geom_vline(aes(xintercept = s$q50, color = "Posterior median"), linetype = 3, linewidth = 0.9) +
+
+    # True value
+    geom_vline(aes(xintercept = s$true, color = "True value"), linetype = 1, linewidth = 0.9) +
+
+    labs(x = bquote(y[.(bname)]^{plain(new)}), y = "Density") +
+    theme_bw() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_blank()
+    ) +
+    guides(color = guide_legend(title = NULL))
+}
+
+h1 <- make_hist("11")
+h2 <- make_hist("12")
+
+fig_pred <- ggarrange(h1, h2, ncol = 2, common.legend = TRUE, legend = "bottom")
+fig_pred <- annotate_figure(fig_pred, top = text_grob("Histogram of Posterior Predictive Samples", size = 10, face = "bold"))
+fig_pred
+```
 
 ![](README_files/figure-gfm/visualize_ySamps-1.png)<!-- -->
 
@@ -120,7 +172,7 @@ DMS-1854667 for this work.
 
 ## Citation
 
-If you use *BayesCoMET* in your work, please cite: Sarkar, S., Khare,
+If you use **BayesCoMET** in your work, please cite: Sarkar, S., Khare,
 K., & Srivastava, S. (2026). **CoMET: A Compressed Bayesian
 Mixed-Effects Model for High-Dimensional Tensors.** *arXiv.*
 <https://arxiv.org/pdf/2602.19236>
