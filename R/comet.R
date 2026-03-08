@@ -64,8 +64,6 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
     errVarSamp <- rep(NA, (niter - nburn) / nthin) ## idiosyncratic error variance
     lambda2Samplist <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, pdims[d] * K)}) ## local shrinkage parameters
     delta2Samp <- matrix(NA, (niter - nburn) / nthin, K) ## global shrinkage parameters
-    nuSamplist <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, pdims[d] * K)})
-    xiSamp <- matrix(NA, (niter - nburn) / nthin, K)
     gammaSamplist <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, kdims[d] * kdims[d])}) ## vectorized compressed covariance parameters
     ranefSamplist <- vector("list", (niter - nburn) / nthin)
     #############################################################
@@ -147,12 +145,10 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
             for(d in 1:nmodes) {
                 gammaSamplist[[d]][cts, ] <- as.vector(cycle1Samp$GammaSamplist[[d]])
                 lambda2Samplist[[d]][cts, ] <- as.vector(cycle2Samp$lambda2Samplist[[d]])
-                nuSamplist[[d]][cts, ] <- as.vector(cycle2Samp$nuSamplist[[d]])
             }
             betaSamp[cts, ] <- as.vector(cycle2Samp$BSamp)
             errVarSamp[cts] <- cycle2Samp$errVarSamp
             delta2Samp[cts, ] <- cycle2Samp$delta2Samplist
-            xiSamp[cts, ] <- cycle2Samp$xiSamp
 
             if(store_ranef) {
                 ranefSamplist[[cts]] <- cycle1Samp$vecDi_tilde
@@ -165,10 +161,14 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
         list(betaSamp = betaSamp, errVarSamp = errVarSamp,
              gammaSamplist = gammaSamplist,
              ranefSamplist = ranefSamplist,
+             lambda2Samplist = lambda2Samplist,
+             delta2Samp = delta2Samp,
              sampler_time = endTime - startTime)
     } else {
         list(betaSamp = betaSamp, errVarSamp = errVarSamp,
              gammaSamplist = gammaSamplist,
+             lambda2Samplist = lambda2Samplist,
+             delta2Samp = delta2Samp,
              sampler_time = endTime - startTime)
     }
 
