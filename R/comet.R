@@ -102,15 +102,13 @@ comet <- function(y, xlist, zlist, mis, K, kdims,
                                 do.call("rbind", vec_comp_zlist[rows_i])
                             })
 
-    vecxlist <- lapply(xlist, as.vector)
-
     RRtkron <- revkronAll(lapply(R_list, tcrossprod))
 
     cts <- 0
     startTime <- proc.time()
     for(its in 1:niter) {
         if(its %% 1000 == 0) cat("iteration: ", its, "\n")
-        cycle1Samp <- cometCycle1(y = y, vecxlist = vecxlist, comp_zlist = comp_zlist,
+        cycle1Samp <- cometCycle1(y = y, xlist = xlist, comp_zlist = comp_zlist,
                                    z_tilde_list = z_tilde_list, mis = mis,
                                    B = B, errVar = errVar,
                                    Gamma_list = Gamma_list, Sigma_gamma_list = Sigma_gamma_list,

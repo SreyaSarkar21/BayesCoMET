@@ -43,8 +43,9 @@ generate_cpB_with_sparse_factors <- function(pdims, K = 2,
 }
 
 genarrayNormal <- function(dims, Mean, covlist) {
-    covWhole = revkronAll(lapply(covlist, chol))
-    vecX <- as.vector(Mean) + drop(rnorm(prod(dims)) %*% covWhole)
+    covWhole <- revkronAll(lapply(covlist, chol))
+    z <- matrix(rnorm(prod(dims)), ncol = 1)
+    vecX <- as.vector(Mean) + drop(covWhole %*% z) #drop(rnorm(prod(dims)) %*% covWhole)
     X <- array(vecX, dim = dims)
 }
 
@@ -75,9 +76,10 @@ simdata <- function(pdims, qdims, n, m, errVar, B, L_list,
     for(i in 1:n) {
         vecDi <- matrix(rnorm(prod(sdims)), ncol = 1)
         vecAi <- drop(revkronAll(L_list) %*% vecDi)
+        Ai <- array(vecAi, dim = qdims)
         for(j in ((i-1)*m+1):(i*m)) {
-            fixef_comp <- sum(as.vector(Xijlist[[j]]) * as.vector(B))
-            ranef_comp <- sum(vecAi * as.vector(Zijlist[[j]]))
+            fixef_comp <- sum(Xijlist[[j]] * B)
+            ranef_comp <- sum(Ai * Zijlist[[j]])
             yijs[j] <- fixef_comp + ranef_comp + rnorm(1, 0, sd = sqrt(errVar))
         }
     }

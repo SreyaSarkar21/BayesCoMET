@@ -1,6 +1,6 @@
-#' @title predict_newsubj
+#' @title predict_existingsubj
 #'
-#' @description This function performs posterior prediction for new subjects using the CoMET model.
+#' @description This function performs posterior prediction of new observations for existing subjects using the CoMET model.
 #'
 #' @param object a list of posterior samples of parameters returned by the function \code{\link{comet}}.
 #' @param kdims a vector of length \eqn{D} (number of tensor modes), where each element equals the \eqn{d}-th mode-specific compressed covariance dimension \eqn{k_d}.
@@ -20,12 +20,15 @@
 #' @importFrom stats rnorm quantile
 #' @export
 
-predict_newsubj <- function(object, kdims, R_list, S_list,
-                            xlist_test, zlist_test, mis, nom.level) {
+predict_existingsubj <- function(object, kdims,
+                                 R_list, S_list,
+                                 xlist_test, zlist_test, mis,
+                                 nom.level) {
 
     betaSamp <- object$betaSamp
     errVarSamp <- object$errVarSamp
     gammaSamplist <- object$gammaSamplist
+    ranefSamplist <- object$ranefSamplist
 
     nmodes <- length(gammaSamplist)
     n_test <- length(mis); N_test <- sum(mis)
@@ -33,9 +36,10 @@ predict_newsubj <- function(object, kdims, R_list, S_list,
     mis_starts <- c(1, mis_cumsum[-length(mis)] + 1)
     niter <- length(errVarSamp)
 
-    preds <- vector("list", n_test)
+    resids <- vector("list", n_test); preds <- vector("list", n_test)
     yhat_samples <- vector("list", n_test)
     qlower <- vector("list", n_test); qupper <- vector("list", n_test)
+
 
     #### compress Zij arrays ####
     comp_zlist_test <- vector("list", N_test)
@@ -53,10 +57,7 @@ predict_newsubj <- function(object, kdims, R_list, S_list,
         do.call("rbind", vec_comp_zlist_test[rows_i])
     })
 
-    RRtkron <- revkronAll(lapply(R_list, tcrossprod))
-
     vecx_test <- lapply(xlist_test, function(foo) {as.vector(foo)})
-
     Xi_test <- lapply(1:n_test,
                       function(i) {
                           rows_i <- mis_starts[i]:mis_cumsum[i]
@@ -66,18 +67,25 @@ predict_newsubj <- function(object, kdims, R_list, S_list,
     GammaSamplist <- lapply(seq_len(nmodes),
                             function(d) {lapply(seq_len(nrow(gammaSamplist[[d]])),
                                                 function(foo) matrix(gammaSamplist[[d]][foo, ], kdims[d], kdims[d]))})
+    Gkron_list <- vector("list", niter)
+    for (tt in 1:niter) {
+        obj <- lapply(seq_len(nmodes), function(d) GammaSamplist[[d]][[tt]])
+        Gkron_list[[tt]] <- revkronAll(obj)
+    }
 
     for (gg in 1:n_test) {
         yhat <- list()
         for (tt in 1:niter) {
-            obj <- lapply(seq_len(nmodes), function(d) GammaSamplist[[d]][[tt]])
-            Gkron <- revkronAll(obj)
-            predCov <- errVarSamp[tt] * (z_tilde_list_test[[gg]] %*% Gkron %*% RRtkron %*% crossprod(Gkron, t(z_tilde_list_test[[gg]])) + diag(1, mis[gg]))
-            yhat[[tt]] <- Xi_test[[gg]] %*% betaSamp[tt, ] + drop(crossprod(chol(predCov), rnorm(mis[gg])))
+            Gkron <- Gkron_list[[tt]]
+            di_tilde <- ranefSamplist[[tt]][[gg]]
+            ranComp <- z_tilde_list_test[[gg]] %*% Gkron %*% di_tilde
+            mu_y <- as.vector(Xi_test[[gg]] %*% betaSamp[tt, ] + ranComp)
+            yhat[[tt]] <- rnorm(mis[gg], mean = mu_y, sd = sqrt(errVarSamp[tt]))
         }
 
-        yhat_samples[[gg]] <- do.call(cbind, yhat)
-        preds[[gg]] <- rowMeans(yhat_samples[[gg]])
+        yhat_samples <- do.call(cbind, yhat)
+
+        preds[[gg]] <- rowMeans(yhat_samples)
 
         grpvec <- 1:mis[gg]
 
@@ -88,7 +96,7 @@ predict_newsubj <- function(object, kdims, R_list, S_list,
 
     result <- list(ypred = preds, yhat_samples = yhat_samples,
                    lower_pi = qlower, upper_pi = qupper)
+
     result
 }
-
 

@@ -49,7 +49,7 @@ equicorr_mat <- function(q, rho) {
 }
 
 Sigma1 <- Sigma2 <- equicorr_mat(q = 32, rho = 0.5)
-L1 <- chol(Sigma1); L2 <- chol(Sigma2)
+L1 <- t(chol(Sigma1)); L2 <- t(chol(Sigma2))
 
 ## Simulating data with 150 subjects each with cluster size m
 dat <- BayesCoMET:::simdata(pdims = c(32, 32), qdims = c(32, 32), n = 150, m = m,
@@ -92,8 +92,8 @@ res <- BayesCoMET::comet(y = y_train, xlist = xlist_train, zlist = zlist_train,
 res$sampler_time / 60
 ```
 
-    ##       user     system    elapsed 
-    ## 23.3302833  0.4356833 23.9008833
+    ##     user   system  elapsed 
+    ## 15.39575  0.39905 15.80140
 
 ``` r
 betaPostMed <- apply(res$betaSamp, 2, median)

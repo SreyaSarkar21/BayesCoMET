@@ -104,7 +104,7 @@ cometCycle2 <- function(y, xlist, z_tilde_list, mis,
 
     ################# Given updated B, sample \tau^2 #################
     xijB_list <- lapply(xlist,
-                        function(foo) {sum(as.vector(foo) * as.vector(B))})
+                        function(foo) {sum(foo * B)})
     mu_list <- lapply(1:n,
                       function(i) {
                           rows_i <- mis_starts[i]:mis_cumsum[i]

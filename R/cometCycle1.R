@@ -3,7 +3,7 @@
 #' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
 #'
 #' @param y a vector containing the response for all the observations.
-#' @param vecxlist a list, each component contains the vectorized fixed-effect covariate for each observation.
+#' @param xlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
 #' @param comp_zlist a list, each component contains the compressed random-effect covariate tensor \eqn{\tilde{\mathcal{Z}}} for each observation.
 #' @param z_tilde_list a list, each component contains vectorized compressed random-effect covariates, stacked for each cluster.
 #' @param mis a vector of cluster sizes.
@@ -20,7 +20,7 @@
 #' }
 #' @importFrom stats rnorm
 
-cometCycle1 <- function(y, vecxlist, comp_zlist, z_tilde_list, mis,
+cometCycle1 <- function(y, xlist, comp_zlist, z_tilde_list, mis,
                          B, errVar,
                          Gamma_list, Sigma_gamma_list, kdims, RRtkron) {
 
@@ -30,7 +30,7 @@ cometCycle1 <- function(y, vecxlist, comp_zlist, z_tilde_list, mis,
     nmodes <- length(kdims)
 
     #### calculate residuals given B
-    check_y <- vapply(seq_len(N), function(ij) {y[ij] - sum(vecxlist[[ij]] * as.vector(B))}, 0.0)
+    check_y <- vapply(seq_len(N), function(ij) {y[ij] - sum(xlist[[ij]] * B)}, 0.0)
     check_ylist <- lapply(seq_len(n), function(i) {rows_i <- mis_starts[i]:mis_cumsum[i]; check_y[rows_i]})
 
     #### Impute compressed random slopes \tilde D_i ####

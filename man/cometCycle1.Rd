@@ -6,7 +6,7 @@
 \usage{
 cometCycle1(
   y,
-  vecxlist,
+  xlist,
   comp_zlist,
   z_tilde_list,
   mis,
@@ -21,7 +21,7 @@ cometCycle1(
 \arguments{
 \item{y}{a vector containing the response for all the observations.}
 
-\item{vecxlist}{a list, each component contains the vectorized fixed-effect covariate for each observation.}
+\item{xlist}{a list, each component contains a tensor-valued fixed-effect covariate for each observation.}
 
 \item{comp_zlist}{a list, each component contains the compressed random-effect covariate tensor \eqn{\tilde{\mathcal{Z}}} for each observation.}
 
