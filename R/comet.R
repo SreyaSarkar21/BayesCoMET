@@ -16,13 +16,25 @@
 #' @param niter number of MCMC iterations.
 #' @param nburn number of burn-in samples.
 #' @param nthin thinning size specifying every nthin-th sample is retained.
-#' @param store_ranef logical; if TRUE, the imputed compressed random-effects are stored. Default value is FALSE.
-#' @return a list containing the following components:
+#' @param store_ranef logical; if TRUE, the imputed compressed random-effects are stored for prediction of existing subjects. Default value is FALSE.
+#' @return If \code{store_ranef = TRUE}, a list with:
 #' \describe{
-#' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p} columns containing posterior samples of fixed effect parameter \eqn{\beta}.}
+#' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p^* = \prod_{d=1}^D p_d} columns containing posterior samples of the cells of fixed-effect coefficient tensor.}
 #' \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
-#' \item{gammaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_1 k_2} columns containing posterior samples of columnwise vectorization of the compressed covariance parameter \eqn{\Gamma}.}
+#' \item{gammaSamplist}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}.}
+#' \item{lambda2Samplist}{a list of local shrinkage parameters with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{K p_d} columns, corresponding to mode-\eqn{d}.}
+#' \item{delta2Samp}{a matrix of global shrinkage parameters with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and the \eqn{K}-th column corresponding to the \eqn{K}-th rank-1 components of fixed-effect coefficient tensor.}
 #' \item{ranefSamplist}{a list of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}}, containing the imputed vectorized compressed random-effects. Returned only when store_ranef = TRUE.}
+#' \item{sampler_time}{time taken by the sampler to run.}
+#' }
+#'
+#' If \code{store_ranef = FALSE}, a list with:
+#' \describe{
+#' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p^* = \prod_{d=1}^D p_d} columns containing posterior samples of the cells of fixed-effect coefficient tensor.}
+#' \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
+#' \item{gammaSamplist}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}.}
+#' \item{lambda2Samplist}{a list of local shrinkage parameters with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{K p_d} columns, corresponding to mode-\eqn{d}.}
+#' \item{delta2Samp}{a matrix of global shrinkage parameters with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and the \eqn{K}-th column corresponding to the \eqn{K}-th rank-1 components of fixed-effect coefficient tensor.}
 #' \item{sampler_time}{time taken by the sampler to run.}
 #' }
 #' @import Matrix

@@ -28,7 +28,11 @@ predict_existingsubj <- function(object, kdims,
     betaSamp <- object$betaSamp
     errVarSamp <- object$errVarSamp
     gammaSamplist <- object$gammaSamplist
-    ranefSamplist <- object$ranefSamplist
+    if(!(ranefSamplist %in% names(object))) {
+        stop("Imputed random-effects are needed for prediction of existing subjects.")
+    } else {
+        ranefSamplist <- object$ranefSamplist
+    }
 
     nmodes <- length(gammaSamplist)
     n_test <- length(mis); N_test <- sum(mis)
@@ -36,7 +40,7 @@ predict_existingsubj <- function(object, kdims,
     mis_starts <- c(1, mis_cumsum[-length(mis)] + 1)
     niter <- length(errVarSamp)
 
-    resids <- vector("list", n_test); preds <- vector("list", n_test)
+    preds <- vector("list", n_test)
     yhat_samples <- vector("list", n_test)
     qlower <- vector("list", n_test); qupper <- vector("list", n_test)
 
@@ -83,9 +87,9 @@ predict_existingsubj <- function(object, kdims,
             yhat[[tt]] <- rnorm(mis[gg], mean = mu_y, sd = sqrt(errVarSamp[tt]))
         }
 
-        yhat_samples <- do.call(cbind, yhat)
+        yhat_samples[[gg]] <- do.call(cbind, yhat)
 
-        preds[[gg]] <- rowMeans(yhat_samples)
+        preds[[gg]] <- rowMeans(yhat_samples[[gg]])
 
         grpvec <- 1:mis[gg]
 
