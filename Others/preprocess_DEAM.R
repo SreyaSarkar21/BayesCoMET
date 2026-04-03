@@ -3,7 +3,7 @@
 rm(list=ls())
 library(tidyverse)
 
-dynamicValence <- read.csv("~/DEAM_data_paper/annotations/annotations averaged per song/dynamic (per second annotations)/valence.csv",
+dynamicValence <- read.csv("~/annotations/annotations averaged per song/dynamic (per second annotations)/valence.csv",
                            header = TRUE, fill = TRUE, stringsAsFactors = FALSE)
 ## Considering the first 200 songs for application
 dynamicValence <- dynamicValence[dynamicValence$song_id > 1000 & dynamicValence$song_id <= 1200, -1]
@@ -32,10 +32,10 @@ avgOverTime <- function(dat, k, byrow = FALSE) {
         # Spliting into consecutive blocks of size k
         idx <- split(seq_len(nvar),
                      ceiling(seq_len(nvar) / k))
-        
+
         # Keeping only full blocks of size k
         idx <- idx[sapply(idx, length) == k]
-        
+
         # Averaging within each block (song-wise)
         avg_dat <- sapply(idx, function(rows) {
             colMeans(dat[rows, , drop = FALSE])
@@ -44,18 +44,18 @@ avgOverTime <- function(dat, k, byrow = FALSE) {
         nvar <- ncol(dat)
         # Spliting into consecutive blocks of size k
         idx <- split(seq_len(nvar), ceiling(seq_len(nvar) / k))
-        
+
         # Keeping only full blocks of size k
         idx <- idx[sapply(idx, length) == k]
-        
+
         # Averaging within each block (song-wise)
         avg_dat <- sapply(idx, function(cols) {
             rowMeans(dat[, cols, drop = FALSE])
         })
     }
-    
+
     list(avg_dat = as.data.frame(avg_dat), idx = idx)
-    
+
 }
 
 
@@ -80,7 +80,7 @@ n <- nrow(avg_arousal_k2); mis <- rep(ncol(avg_arousal_k2), n)
 N <- sum(mis)
 song_ids <- 1001:1200
 y_all <- matrix(NA, N, 2)
-y_all[, 1] <- as.vector(t(avg_valence_k2)) 
+y_all[, 1] <- as.vector(t(avg_valence_k2))
 y_all[, 2] <- as.vector(t(avg_arousal_k2))
 colnames(y_all) <- c("valence", "arousal")
 yij_pc1 <- prcomp(y_all, scale. = TRUE)$x[, 1] ## first pc as response
@@ -90,7 +90,7 @@ Xijlist <- vector("list", N)
 mis_cumsum <- cumsum(mis)
 mis_starts <- c(1, mis_cumsum[-length(mis)] + 1)
 for(i in seq_along(song_ids)) {
-    feature_file <- readr::read_delim(paste0("~/DEAM_data_paper/features/", song_ids[i], ".csv"), delim = ";")
+    feature_file <- readr::read_delim(paste0("~/features/", song_ids[i], ".csv"), delim = ";")
     feature_file <- feature_file[feature_file$frameTime >=15, ]
     feature_file <- column_to_rownames(feature_file, 'frameTime')
     select_feature_file <- feature_file %>% select(matches("spectral"))

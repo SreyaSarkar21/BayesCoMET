@@ -1,7 +1,7 @@
 
 # CoMET: A Compressed Bayesian Mixed-Effects Model for High-Dimensional Tensors
 
-This repositary contains:
+This repository contains:
 
 1.  **R package BayesCoMET**
     - Implements the Compressed Bayesian Mixed-Effects Model for Tensors
@@ -18,14 +18,27 @@ This repositary contains:
       oracle benchmark of CoMET, where the true random-effects
       covariance structure is known.
     - `fanli2012.R` contains the code for implementing the penalized
-      quasi-likelihood method for fixed effects selection by \[1\].
+      quasi-likelihood method for fixed effects selection by [Fan and
+      Li, 2012](https://doi.org/10.1214/12-AOS1028).
     - `licaili2021.R` contains the code implementing the penalized
       quasi-likelihood estimation and inference procedures for fixed
-      effects selection by \[2\], using their published supplementary
-      code as a reference.
+      effects selection by [Li et al.,
+      2021](https://doi.org/10.1080/01621459.2021.1888740), using their
+      published supplementary code as a reference.
     - `gee_cv.m`, `gee_equicorr_predict.m`, `gee_run_DEAM.m` are the
       MATLAB codes using the SparseReg MATLAB library for implementing
-      the GEE approach \[3\].
+      the GEE approach [Zhang et al.,
+      2019](https://doi.org/10.5705/ss.202017.0153).
+    - `preprocess_DEAM.R` contains the code used to preprocess the music
+      emotion recognition (DEAM) data [Aljanaki et al.,
+      2017](https://doi.org/10.1371/journal.pone.0173392). The dataset
+      is available to download
+      [here](https://cvml.unige.ch/databases/DEAM/).
+    - `preprocess_LFW.R` contains the code used to preprocess the
+      Labeled Faces in the Wild (LFW) data [Learned-Miller et al.,
+      2016](https://link.springer.com/chapter/10.1007/978-3-319-25958-1_8).
+      The dataset is available to download
+      [here](https://www.kaggle.com/datasets/jessicali9530/lfw-dataset?select=lfw-deepfunneled).
 
 ## Example Implementation of CoMET
 
@@ -52,14 +65,18 @@ Sigma1 <- Sigma2 <- equicorr_mat(q = 32, rho = 0.5)
 L1 <- t(chol(Sigma1)); L2 <- t(chol(Sigma2))
 
 ## Simulating data with 150 subjects each with cluster size m
-dat <- BayesCoMET:::simdata(pdims = c(32, 32), qdims = c(32, 32), n = 150, m = m,
+dat_train <- BayesCoMET:::simdata(pdims = c(32, 32), qdims = c(32, 32), n = 100, m = m,
                             errVar = 0.1, B = trueB, L_list = list(L1 = L1, L2 = L2),
                             xcov_var = 1, zcov_var = 1, myseed = 1)
 
-## Taking first 100 subjects for training and the rest for validation
-y_train <- dat$yijs[1:(n_train * m)]; y_test <- dat$yijs[(n_train * m + 1):length(dat$yijs)]
-xlist_train <- dat$Xijlist[1:(n_train * m)]; xlist_test <- dat$Xijlist[(n_train * m + 1):length(dat$yijs)]
-zlist_train <- dat$Zijlist[1:(n_train * m)]; zlist_test <- dat$Zijlist[(n_train * m + 1):length(dat$yijs)]
+dat_test <- BayesCoMET:::simdata(pdims = c(32, 32), qdims = c(32, 32), n = 50, m = m,
+                            errVar = 0.1, B = trueB, L_list = list(L1 = L1, L2 = L2),
+                            xcov_var = 1, zcov_var = 1, myseed = 1)
+
+## 100 subjects for training and 50 new subjects for validation
+y_train <- dat_train$yijs; y_test <- dat_test$yijs
+xlist_train <- dat_train$Xijlist; xlist_test <- dat_test$Xijlist
+zlist_train <- dat_train$Zijlist; zlist_test <- dat_test$Zijlist
 nmodes <- length(pdims)
 
 ## Implement CoMET model Gibbs sampler
@@ -93,7 +110,7 @@ res$sampler_time / 60
 ```
 
     ##     user   system  elapsed 
-    ## 15.39575  0.39905 15.80140
+    ## 22.37247  0.31405 22.68350
 
 ``` r
 betaPostMed <- apply(res$betaSamp, 2, median)
@@ -105,7 +122,7 @@ vecB_true <- as.vector(trueB)
 ``` r
 pred_res <- BayesCoMET::predict_newsubj(object = res, kdims = kdims,
                                         R_list = R_list, S_list = S_list,
-                                        y_test = y_test, xlist_test = xlist_test,
+                                        xlist_test = xlist_test,
                                         zlist_test = zlist_test,
                                         mis = rep(m, times = n_test), nom.level = 0.95)
 ```
@@ -176,21 +193,3 @@ If you use **BayesCoMET** in your work, please cite: Sarkar, S., Khare,
 K., & Srivastava, S. (2026). **CoMET: A Compressed Bayesian
 Mixed-Effects Model for High-Dimensional Tensors.** *arXiv.*
 <https://arxiv.org/pdf/2602.19236>
-
-## Other References
-
-\[1\] Fan, Y., & Li, R. (2012). **Variable Selection in Linear Mixed
-Effects Models.** *The Annals of Statistics*, Vol. 40, No. 4,
-pp. 2043–2068. DOI:
-[10.1214/12-AOS1028](https://doi.org/10.1214/12-AOS1028).
-
-\[2\] Li, S., Cai T. T., & Li, H. (2022). **Inference for
-High-Dimensional Linear Mixed-Effects Models: A Quasi-Likelihood
-Approach.** *Journal of the American Statistical Association*, 117(540),
-1835–1846. DOI:
-[10.1080/01621459.2021.1888740](https://doi.org/10.1080/01621459.2021.1888740).
-
-\[3\] Zhang X., Li, L., Zhou, H., Shen, D., et al. (2019). **Tensor
-generalized estimating equations for longitudinal imaging analysis.**
-*Statistica Sinica*, 29(4), 1977-2005. DOI:
-[10.5705/ss.202017.0153](https://doi.org/10.5705/ss.202017.0153).
