@@ -9,6 +9,7 @@ comet(
   xlist,
   zlist,
   mis,
+  family = "gaussian",
   K,
   kdims,
   a0,
@@ -30,6 +31,8 @@ comet(
 \item{zlist}{a list, each component contains a tensor-valued random-effect covariate for each observation.}
 
 \item{mis}{a vector of cluster sizes.}
+
+\item{family}{currently supports only Gaussian family. Default value is "gaussian".}
 
 \item{K}{a user-specified rank for CP structure of fixed-effect coefficient. Should not exceed the dimensions for matrix-valued covariates.}
 

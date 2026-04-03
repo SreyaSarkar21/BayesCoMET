@@ -6,6 +6,7 @@
 #' @param xlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
 #' @param zlist a list, each component contains a tensor-valued random-effect covariate for each observation.
 #' @param mis a vector of cluster sizes.
+#' @param family currently supports only Gaussian family. Default value is "gaussian".
 #' @param K a user-specified rank for CP structure of fixed-effect coefficient. Should not exceed the dimensions for matrix-valued covariates.
 #' @param kdims a vector of length \eqn{D} (number of tensor modes), where each element equals the \eqn{d}-th mode-specific compressed covariance dimension \eqn{k_d}.
 #' @param a0 shape hyperparameter for inverse-gamma prior for idiosyncratic error variance.
@@ -43,7 +44,7 @@
 #' @export
 
 
-comet <- function(y, xlist, zlist, mis, K, kdims,
+comet <- function(y, xlist, zlist, mis, family = "gaussian", K, kdims,
                   a0, b0, gammaVar0, R_list, S_list,
                   niter, nburn, nthin, store_ranef = FALSE) {
 
