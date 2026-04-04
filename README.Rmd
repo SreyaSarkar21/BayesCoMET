@@ -20,8 +20,8 @@ This repository contains:
     - `fanli2012.R` contains the code for implementing the penalized quasi-likelihood method for fixed effects selection by [Fan and Li, 2012](https://doi.org/10.1214/12-AOS1028).
     - `licaili2021.R` contains the code implementing the penalized quasi-likelihood estimation and inference procedures for fixed effects selection by [Li et al., 2021](https://doi.org/10.1080/01621459.2021.1888740), using their published supplementary code as a reference.
     - `gee_cv.m`, `gee_equicorr_predict.m`, `gee_run_DEAM.m` are the MATLAB codes using the SparseReg MATLAB library for implementing the GEE approach [Zhang et al., 2019](https://doi.org/10.5705/ss.202017.0153).
-    - `preprocess_DEAM.R` contains the code used to preprocess the music emotion recognition (DEAM) data [Aljanaki et al., 2017](https://doi.org/10.1371/journal.pone.0173392). The dataset is available to download [here](https://cvml.unige.ch/databases/DEAM/).
-    - `preprocess_LFW.R` contains the code used to preprocess the Labeled Faces in the Wild (LFW) data [Learned-Miller et al., 2016](https://link.springer.com/chapter/10.1007/978-3-319-25958-1_8). The dataset is available to download [here](https://www.kaggle.com/datasets/jessicali9530/lfw-dataset?select=lfw-deepfunneled).
+    - `preprocess_DEAM.R` contains the code used to preprocess the music emotion recognition (DEAM) data by [Aljanaki et al., 2017](https://doi.org/10.1371/journal.pone.0173392). The dataset is available to download [here](https://cvml.unige.ch/databases/DEAM/).
+    - `preprocess_LFW.R` contains the code used to preprocess the Labeled Faces in the Wild (LFW) data by [Learned-Miller et al., 2016](https://link.springer.com/chapter/10.1007/978-3-319-25958-1_8). The dataset is available to download [here](https://www.kaggle.com/datasets/jessicali9530/lfw-dataset?select=lfw-deepfunneled).
 
 
 ## Example Implementation of CoMET
@@ -30,6 +30,7 @@ This repository contains:
 pdims <- qdims <- c(32, 32)
 n_train <- 100; n_test <- 50; m <- 9 ## 9 observations per subject
 
+set.seed(12345)
 ## Generating a  CP-structured fixed-effect coefficient
 cp_decomp_B <- BayesCoMET:::generate_cpB_with_sparse_factors(pdims = c(32, 32), K = 4,
                                                              sparsity = 0.25, seed = 123)
@@ -65,7 +66,6 @@ nmodes <- length(pdims)
 
 ## Implement CoMET model Gibbs sampler
 kdims <- rep(3, nmodes)
-set.seed(12345)
 R_list <- lapply(1:nmodes, function(d) {matrix(rnorm(kdims[d] * qdims[d], 0, sd = sqrt(1/kdims[d])), kdims[d], qdims[d])})
 S_list <- lapply(1:nmodes, function(d) {matrix(rnorm(kdims[d] * qdims[d], 0, sd = sqrt(1/kdims[d])), kdims[d], qdims[d])})
 
@@ -88,18 +88,18 @@ library(dplyr)
 library(ggplot2)
 library(ggpubr)
 
-idx <- c("438", "439")
+idx <- c("441", "440")
 niter <- 10000
 
 beta_df <- data.frame(
-  postsamp = c(res$betaSamp[, 438], res$betaSamp[, 439]),
+  postsamp = c(res$betaSamp[, 441], res$betaSamp[, 440]),
   betaidx  = factor(rep(idx, each = niter), levels = idx))
 
 bsumm_df <- data.frame(
-  q025 = c(quantile(res$betaSamp[, 438], 0.025), quantile(res$betaSamp[, 439], 0.025)),
-  q50 = c(median(res$betaSamp[, 438]), median(res$betaSamp[, 439])),
-  q975 = c(quantile(res$betaSamp[, 438], 0.975), quantile(res$betaSamp[, 439], 0.975)),
-  true = c(vecB_true[438], vecB_true[439]),
+  q025 = c(quantile(res$betaSamp[, 441], 0.025), quantile(res$betaSamp[, 440], 0.025)),
+  q50 = c(median(res$betaSamp[, 441]), median(res$betaSamp[, 440])),
+  q975 = c(quantile(res$betaSamp[, 441], 0.975), quantile(res$betaSamp[, 440], 0.975)),
+  true = c(vecB_true[441], vecB_true[440]),
   betaidx = factor(idx, levels = idx))
 
 make_hist <- function(bname) {
@@ -128,8 +128,8 @@ make_hist <- function(bname) {
     guides(color = guide_legend(title = NULL))
 }
 
-h1 <- make_hist("438")
-h2 <- make_hist("439")
+h1 <- make_hist("441")
+h2 <- make_hist("440")
 
 fig_beta <- ggarrange(h1, h2, ncol = 2, common.legend = TRUE, legend = "bottom")
 fig_beta <- annotate_figure(fig_beta, top = text_grob("Histogram of Posterior Samples of B", size = 10, face = "bold"))

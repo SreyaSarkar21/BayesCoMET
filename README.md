@@ -30,12 +30,12 @@ This repository contains:
       the GEE approach [Zhang et al.,
       2019](https://doi.org/10.5705/ss.202017.0153).
     - `preprocess_DEAM.R` contains the code used to preprocess the music
-      emotion recognition (DEAM) data [Aljanaki et al.,
+      emotion recognition (DEAM) data by [Aljanaki et al.,
       2017](https://doi.org/10.1371/journal.pone.0173392). The dataset
       is available to download
       [here](https://cvml.unige.ch/databases/DEAM/).
     - `preprocess_LFW.R` contains the code used to preprocess the
-      Labeled Faces in the Wild (LFW) data [Learned-Miller et al.,
+      Labeled Faces in the Wild (LFW) data by [Learned-Miller et al.,
       2016](https://link.springer.com/chapter/10.1007/978-3-319-25958-1_8).
       The dataset is available to download
       [here](https://www.kaggle.com/datasets/jessicali9530/lfw-dataset?select=lfw-deepfunneled).
@@ -46,6 +46,7 @@ This repository contains:
 pdims <- qdims <- c(32, 32)
 n_train <- 100; n_test <- 50; m <- 9 ## 9 observations per subject
 
+set.seed(12345)
 ## Generating a  CP-structured fixed-effect coefficient
 cp_decomp_B <- BayesCoMET:::generate_cpB_with_sparse_factors(pdims = c(32, 32), K = 4,
                                                              sparsity = 0.25, seed = 123)
@@ -81,7 +82,6 @@ nmodes <- length(pdims)
 
 ## Implement CoMET model Gibbs sampler
 kdims <- rep(3, nmodes)
-set.seed(12345)
 R_list <- lapply(1:nmodes, function(d) {matrix(rnorm(kdims[d] * qdims[d], 0, sd = sqrt(1/kdims[d])), kdims[d], qdims[d])})
 S_list <- lapply(1:nmodes, function(d) {matrix(rnorm(kdims[d] * qdims[d], 0, sd = sqrt(1/kdims[d])), kdims[d], qdims[d])})
 
@@ -110,7 +110,7 @@ res$sampler_time / 60
 ```
 
     ##     user   system  elapsed 
-    ## 22.37247  0.31405 22.68350
+    ## 22.52927  0.41870 23.02825
 
 ``` r
 betaPostMed <- apply(res$betaSamp, 2, median)
