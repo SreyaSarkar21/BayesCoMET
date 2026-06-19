@@ -41,6 +41,8 @@ cme(
 \item{nburn}{number of burn-in samples.}
 
 \item{nthin}{thinning size specifying every nthin-th sample is retained.}
+
+\item{store_ranef}{logical; if TRUE, the imputed compressed random-effects are stored for prediction of existing subjects. Default value is FALSE.}
 }
 \value{
 a list containing the following components:

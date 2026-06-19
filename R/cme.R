@@ -13,6 +13,7 @@
 #' @param niter number of MCMC iterations.
 #' @param nburn number of burn-in samples.
 #' @param nthin thinning size specifying every nthin-th sample is retained.
+#' @param store_ranef logical; if TRUE, the imputed compressed random-effects are stored for prediction of existing subjects. Default value is FALSE.
 #' @return a list containing the following components:
 #' \describe{
 #' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p} columns containing posterior samples of fixed effect parameter \eqn{\beta}.}
@@ -216,7 +217,7 @@ cmeCycle2 <- function(ylist, xlist, zlist,
 #'
 #' @description This function performs posterior predictive sampling using the compressed mixed-effects (CME) model.
 #'
-#' @param sampler_res a list of posterior samples of \eqn{(\beta, \tau^2, \gamma)} returned by the function \code{\link{sampleCME}}.
+#' @param sampler_res a list of posterior samples of \eqn{(\beta, \tau^2, \gamma)} returned by the function \code{\link{cme}}.
 #' @param xlist_test a list of fixed effect covariates where the \eqn{i^{th}} component contains \eqn{m_i} observations for the \eqn{i^{th}} subject.
 #' @param zlist_test a list of random effect covariates where the \eqn{i^{th}} component contains \eqn{m_i} observations for the \eqn{i^{th}} subject.
 #' @param S the \eqn{k_1 \times q} random projection matrix used to implement the collapsed Gibbs sampler, with entries iid from a Gaussian distribution with mean 0 and variance \eqn{1/k_1}.

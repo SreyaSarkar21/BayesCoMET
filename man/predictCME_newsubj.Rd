@@ -7,7 +7,7 @@
 predictCME_newsubj(sampler_res, xlist_test, zlist_test, R, S, nom.level)
 }
 \arguments{
-\item{sampler_res}{a list of posterior samples of \eqn{(\beta, \tau^2, \gamma)} returned by the function \code{\link{sampleCME}}.}
+\item{sampler_res}{a list of posterior samples of \eqn{(\beta, \tau^2, \gamma)} returned by the function \code{\link{cme}}.}
 
 \item{xlist_test}{a list of fixed effect covariates where the \eqn{i^{th}} component contains \eqn{m_i} observations for the \eqn{i^{th}} subject.}
 
