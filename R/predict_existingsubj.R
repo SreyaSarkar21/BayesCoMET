@@ -1,6 +1,6 @@
 #' @title predict_existingsubj
 #'
-#' @description This function performs posterior prediction of new observations for existing subjects using the CoMET model.
+#' @description This function performs posterior prediction of new observations for existing subjects using the compressed mixed model.
 #'
 #' @param object a list of posterior samples of parameters returned by the function \code{\link{comet}}.
 #' @param kdims a vector of length \eqn{D} (number of tensor modes), where each element equals the \eqn{d}-th mode-specific compressed covariance dimension \eqn{k_d}.
@@ -27,14 +27,14 @@ predict_existingsubj <- function(object, kdims,
 
     betaSamp <- object$betaSamp
     errVarSamp <- object$errVarSamp
-    gammaSamplist <- object$gammaSamplist
+    gammaSamp <- object$gammaSamp
     if(!(ranefSamplist %in% names(object))) {
         stop("Imputed random-effects are needed for prediction of existing subjects.")
     } else {
         ranefSamplist <- object$ranefSamplist
     }
 
-    nmodes <- length(gammaSamplist)
+    nmodes <- length(gammaSamp)
     n_test <- length(mis); N_test <- sum(mis)
     mis_cumsum <- cumsum(mis)
     mis_starts <- c(1, mis_cumsum[-length(mis)] + 1)
@@ -69,8 +69,8 @@ predict_existingsubj <- function(object, kdims,
                       })
 
     GammaSamplist <- lapply(seq_len(nmodes),
-                            function(d) {lapply(seq_len(nrow(gammaSamplist[[d]])),
-                                                function(foo) matrix(gammaSamplist[[d]][foo, ], kdims[d], kdims[d]))})
+                            function(d) {lapply(seq_len(nrow(gammaSamp[[d]])),
+                                                function(foo) matrix(gammaSamp[[d]][foo, ], kdims[d], kdims[d]))})
     Gkron_list <- vector("list", niter)
     for (tt in 1:niter) {
         obj <- lapply(seq_len(nmodes), function(d) GammaSamplist[[d]][[tt]])

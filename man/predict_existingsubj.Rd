@@ -42,5 +42,5 @@ a list containing the following components:
 }
 }
 \description{
-This function performs posterior prediction of new observations for existing subjects using the CoMET model.
+This function performs posterior prediction of new observations for existing subjects using the compressed mixed model.
 }

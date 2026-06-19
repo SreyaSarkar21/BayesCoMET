@@ -10,7 +10,7 @@ comet(
   zlist,
   mis,
   family = "gaussian",
-  K,
+  K = NULL,
   kdims,
   a0,
   b0,
@@ -34,7 +34,7 @@ comet(
 
 \item{family}{currently supports only Gaussian family. Default value is "gaussian".}
 
-\item{K}{a user-specified rank for CP structure of fixed-effect coefficient. Should not exceed the dimensions for matrix-valued covariates.}
+\item{K}{a user-specified rank for CP structure of a second or higher-order tensor-valued fixed-effect coefficient. Default value is NULL to accommodate first order tensors (vectors).}
 
 \item{kdims}{a vector of length \eqn{D} (number of tensor modes), where each element equals the \eqn{d}-th mode-specific compressed covariance dimension \eqn{k_d}.}
 
@@ -61,9 +61,7 @@ If \code{store_ranef = TRUE}, a list with:
 \describe{
 \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p^* = \prod_{d=1}^D p_d} columns containing posterior samples of the cells of fixed-effect coefficient tensor.}
 \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
-\item{gammaSamplist}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}.}
-\item{lambda2Samplist}{a list of local shrinkage parameters with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{K p_d} columns, corresponding to mode-\eqn{d}.}
-\item{delta2Samp}{a matrix of global shrinkage parameters with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and the \eqn{K}-th column corresponding to the \eqn{K}-th rank-1 components of fixed-effect coefficient tensor.}
+\item{gammaSamp}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}; returned as one matrix for vector covariates.}
 \item{ranefSamplist}{a list of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}}, containing the imputed vectorized compressed random-effects. Returned only when store_ranef = TRUE.}
 \item{sampler_time}{time taken by the sampler to run.}
 }
@@ -72,12 +70,10 @@ If \code{store_ranef = FALSE}, a list with:
 \describe{
 \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p^* = \prod_{d=1}^D p_d} columns containing posterior samples of the cells of fixed-effect coefficient tensor.}
 \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
-\item{gammaSamplist}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}.}
-\item{lambda2Samplist}{a list of local shrinkage parameters with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{K p_d} columns, corresponding to mode-\eqn{d}.}
-\item{delta2Samp}{a matrix of global shrinkage parameters with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and the \eqn{K}-th column corresponding to the \eqn{K}-th rank-1 components of fixed-effect coefficient tensor.}
+\item{gammaSamp}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}; returned as one matrix for vector covariates.}
 \item{sampler_time}{time taken by the sampler to run.}
 }
 }
 \description{
-This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
+This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects model.
 }

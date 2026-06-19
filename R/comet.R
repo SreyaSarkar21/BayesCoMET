@@ -1,13 +1,13 @@
 #' @title comet
 #'
-#' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects tensor (CoMET) model.
+#' @description This function implements the collapsed Gibbs sampler for fitting the compressed mixed-effects model.
 #'
 #' @param y a vector containing the response for all the observations.
 #' @param xlist a list, each component contains a tensor-valued fixed-effect covariate for each observation.
 #' @param zlist a list, each component contains a tensor-valued random-effect covariate for each observation.
 #' @param mis a vector of cluster sizes.
 #' @param family currently supports only Gaussian family. Default value is "gaussian".
-#' @param K a user-specified rank for CP structure of fixed-effect coefficient. Should not exceed the dimensions for matrix-valued covariates.
+#' @param K a user-specified rank for CP structure of a second or higher-order tensor-valued fixed-effect coefficient. Default value is NULL to accommodate first order tensors (vectors).
 #' @param kdims a vector of length \eqn{D} (number of tensor modes), where each element equals the \eqn{d}-th mode-specific compressed covariance dimension \eqn{k_d}.
 #' @param a0 shape hyperparameter for inverse-gamma prior for idiosyncratic error variance.
 #' @param b0 scale hyperparameter for inverse-gamma prior for idiosyncratic error variance.
@@ -22,9 +22,7 @@
 #' \describe{
 #' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p^* = \prod_{d=1}^D p_d} columns containing posterior samples of the cells of fixed-effect coefficient tensor.}
 #' \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
-#' \item{gammaSamplist}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}.}
-#' \item{lambda2Samplist}{a list of local shrinkage parameters with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{K p_d} columns, corresponding to mode-\eqn{d}.}
-#' \item{delta2Samp}{a matrix of global shrinkage parameters with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and the \eqn{K}-th column corresponding to the \eqn{K}-th rank-1 components of fixed-effect coefficient tensor.}
+#' \item{gammaSamp}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}; returned as one matrix for vector covariates.}
 #' \item{ranefSamplist}{a list of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}}, containing the imputed vectorized compressed random-effects. Returned only when store_ranef = TRUE.}
 #' \item{sampler_time}{time taken by the sampler to run.}
 #' }
@@ -33,9 +31,7 @@
 #' \describe{
 #' \item{betaSamp}{a matrix with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{p^* = \prod_{d=1}^D p_d} columns containing posterior samples of the cells of fixed-effect coefficient tensor.}
 #' \item{errVarSamp}{a numeric vector of length \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} containing posterior samples of error variance \eqn{\tau^2}.}
-#' \item{gammaSamplist}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}.}
-#' \item{lambda2Samplist}{a list of local shrinkage parameters with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{K p_d} columns, corresponding to mode-\eqn{d}.}
-#' \item{delta2Samp}{a matrix of global shrinkage parameters with \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and the \eqn{K}-th column corresponding to the \eqn{K}-th rank-1 components of fixed-effect coefficient tensor.}
+#' \item{gammaSamp}{a list with the \eqn{d}-th component as a matrix of \eqn{\bigl(\text{niter}-\text{nburn}\bigr)/\text{nthin}} rows and \eqn{k_d^2} columns, corresponding to the mode-\eqn{d} compressed covariance parameter \eqn{\gamma_d}; returned as one matrix for vector covariates.}
 #' \item{sampler_time}{time taken by the sampler to run.}
 #' }
 #' @import Matrix
@@ -44,27 +40,55 @@
 #' @export
 
 
-comet <- function(y, xlist, zlist, mis, family = "gaussian", K, kdims,
+comet <- function(y, xlist, zlist, mis, family = "gaussian", K = NULL, kdims,
                   a0, b0, gammaVar0, R_list, S_list,
                   niter, nburn, nthin, store_ranef = FALSE) {
 
     n <- length(mis) ## number of groups/clusters
     N <- sum(mis) ## total number of observations
-    pdims <- dim(xlist[[1]]) ## fixed-effect tensor dimensions
-    qdims <- dim(zlist[[1]]) ## random-effect tensor dimensions
+    pdims <- get_tensor_dim(xlist[[1]]) ## fixed-effect tensor dimensions
+    qdims <- get_tensor_dim(zlist[[1]]) ## random-effect tensor dimensions
+    stopifnot(length(pdims) == length(qdims))
     nmodes <- length(pdims) ## number of tensor modes
 
     stopifnot(length(y) == N)
     stopifnot(length(xlist) == N)
     stopifnot(length(zlist) == N)
-    if(nmodes == 2 & K > min(pdims)) {
-        stop("`K` must be less than or equal to matrix dimensions.")
-    }
     stopifnot(length(kdims) == nmodes)
     stopifnot(length(gammaVar0) == nmodes)
     stopifnot(length(R_list) == nmodes)
     stopifnot(length(S_list) == nmodes)
     stopifnot(a0 > 0); stopifnot(b0 > 0)
+
+    if(nmodes == 1) {
+        if(!is.null(K)) {
+            message("`K` is ignored for the vector case.")
+        }
+    } else {
+        if(is.null(K)) {
+            stop("`K` must be provided for second or higher order tensors.")
+        }
+        if(nmodes == 2 & !is.null(K)) {
+            if(K > min(pdims)) {
+                stop("`K` must be less than or equal to matrix dimensions.")
+            }
+        }
+    }
+
+    if(nmodes == 1) {
+        ylist_cme <- split(y, rep(seq_along(mis), times = mis))
+        ylist_cme <- unname(ylist_cme)
+        xlist_cme <- lapply(split(xlist, rep(seq_along(mis), times = mis)), function(foo) do.call("rbind", foo))
+        xlist_cme <- unname(xlist_cme)
+        zlist_cme <- lapply(split(zlist, rep(seq_along(mis), times = mis)), function(foo) do.call("rbind", foo))
+        zlist_cme <- unname(zlist_cme)
+
+        output <- cme(ylist = ylist_cme, xlist = xlist_cme, zlist = zlist_cme,
+                      a0 = a0, b0 = b0, gammaVar0 = gammaVar0,
+                      R = R_list[[1]], S = S_list[[1]],
+                      niter = niter, nburn = nburn, nthin = nthin,
+                      store_ranef = store_ranef)
+    } else {
 
     mis_cumsum <- cumsum(mis)
     mis_starts <- c(1, mis_cumsum[-length(mis)] + 1)
@@ -75,9 +99,7 @@ comet <- function(y, xlist, zlist, mis, family = "gaussian", K, kdims,
     ################## Storing final samples #####################
     betaSamp <- matrix(NA, (niter - nburn) / nthin, prod(pdims)) ## vectorized fixed-effect coefficient
     errVarSamp <- rep(NA, (niter - nburn) / nthin) ## idiosyncratic error variance
-    lambda2Samplist <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, pdims[d] * K)}) ## local shrinkage parameters
-    delta2Samp <- matrix(NA, (niter - nburn) / nthin, K) ## global shrinkage parameters
-    gammaSamplist <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, kdims[d] * kdims[d])}) ## vectorized compressed covariance parameters
+    gammaSamp <- lapply(1:nmodes, function(d) {matrix(NA, (niter - nburn) / nthin, kdims[d] * kdims[d])}) ## vectorized compressed covariance parameters
     ranefSamplist <- vector("list", (niter - nburn) / nthin)
     #############################################################
 
@@ -95,7 +117,6 @@ comet <- function(y, xlist, zlist, mis, family = "gaussian", K, kdims,
     gram_mat <- crossprod(x_mat)
     # OLS or ridge-like estimate
     beta_init <- chol2inv(chol(gram_mat + diag(1e-6, nrow(gram_mat)))) %*% crossprod(x_mat, y)
-    #message("Done beta_init")
     B <- array(beta_init, dim = pdims)
     B_factors <- init_CP_factors(beta_vec = beta_init, pdims = pdims, K = K)$U
     ###########################################################
@@ -154,12 +175,10 @@ comet <- function(y, xlist, zlist, mis, family = "gaussian", K, kdims,
         if (its > nburn & its %% nthin == 0) {
             cts <- cts + 1
             for(d in 1:nmodes) {
-                gammaSamplist[[d]][cts, ] <- as.vector(cycle1Samp$GammaSamplist[[d]])
-                lambda2Samplist[[d]][cts, ] <- as.vector(cycle2Samp$lambda2Samplist[[d]])
+                gammaSamp[[d]][cts, ] <- as.vector(cycle1Samp$GammaSamplist[[d]])
             }
             betaSamp[cts, ] <- as.vector(cycle2Samp$BSamp)
             errVarSamp[cts] <- cycle2Samp$errVarSamp
-            delta2Samp[cts, ] <- cycle2Samp$delta2Samplist
 
             if(store_ranef) {
                 ranefSamplist[[cts]] <- cycle1Samp$vecDi_tilde
@@ -169,18 +188,15 @@ comet <- function(y, xlist, zlist, mis, family = "gaussian", K, kdims,
     endTime <- proc.time()
 
     if(store_ranef) {
-        list(betaSamp = betaSamp, errVarSamp = errVarSamp,
-             gammaSamplist = gammaSamplist,
+        output <- list(betaSamp = betaSamp, errVarSamp = errVarSamp,
+             gammaSamp = gammaSamp,
              ranefSamplist = ranefSamplist,
-             lambda2Samplist = lambda2Samplist,
-             delta2Samp = delta2Samp,
              sampler_time = endTime - startTime)
     } else {
-        list(betaSamp = betaSamp, errVarSamp = errVarSamp,
-             gammaSamplist = gammaSamplist,
-             lambda2Samplist = lambda2Samplist,
-             delta2Samp = delta2Samp,
+        output <- list(betaSamp = betaSamp, errVarSamp = errVarSamp,
+             gammaSamp = gammaSamp,
              sampler_time = endTime - startTime)
     }
-
+    }
+    output
 }

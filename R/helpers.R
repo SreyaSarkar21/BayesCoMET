@@ -93,3 +93,11 @@ init_CP_factors <- function(beta_vec, pdims, K) {
     }
 }
 
+
+get_tensor_dim <- function(x) {
+    dimx <- dim(x)
+    if(is.null(dimx)) {
+        dimx <- length(x) ## for vector (1D tensor)
+    }
+    return(as.integer(dimx))
+}

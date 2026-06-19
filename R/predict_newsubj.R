@@ -1,6 +1,6 @@
 #' @title predict_newsubj
 #'
-#' @description This function performs posterior prediction for new subjects using the CoMET model.
+#' @description This function performs posterior prediction for new subjects using the compressed mixed model.
 #'
 #' @param object a list of posterior samples of parameters returned by the function \code{\link{comet}}.
 #' @param kdims a vector of length \eqn{D} (number of tensor modes), where each element equals the \eqn{d}-th mode-specific compressed covariance dimension \eqn{k_d}.
@@ -23,11 +23,23 @@
 predict_newsubj <- function(object, kdims, R_list, S_list,
                             xlist_test, zlist_test, mis, nom.level) {
 
+    nmodes <- length(kdims)
+    if(nmodes == 1){
+        xlist_test_cme <- lapply(split(xlist_test, rep(seq_along(mis), times = mis)), function(foo) do.call("rbind", foo))
+        xlist_test_cme <- unname(xlist_test_cme)
+        zlist_test_cme <- lapply(split(zlist_test, rep(seq_along(mis), times = mis)), function(foo) do.call("rbind", foo))
+        zlist_test_cme <- unname(zlist_test_cme)
+
+        result <- predictCME_newsubj(sampler_res = object,
+                                       xlist_test = xlist_test_cme, zlist_test = zlist_test_cme,
+                                       R = R_list[[1]], S = S_list[[1]], nom.level = nom.level)
+
+    } else{
+
     betaSamp <- object$betaSamp
     errVarSamp <- object$errVarSamp
-    gammaSamplist <- object$gammaSamplist
+    gammaSamp <- object$gammaSamp
 
-    nmodes <- length(gammaSamplist)
     n_test <- length(mis); N_test <- sum(mis)
     mis_cumsum <- cumsum(mis)
     mis_starts <- c(1, mis_cumsum[-length(mis)] + 1)
@@ -64,8 +76,8 @@ predict_newsubj <- function(object, kdims, R_list, S_list,
                       })
 
     GammaSamplist <- lapply(seq_len(nmodes),
-                            function(d) {lapply(seq_len(nrow(gammaSamplist[[d]])),
-                                                function(foo) matrix(gammaSamplist[[d]][foo, ], kdims[d], kdims[d]))})
+                            function(d) {lapply(seq_len(nrow(gammaSamp[[d]])),
+                                                function(foo) matrix(gammaSamp[[d]][foo, ], kdims[d], kdims[d]))})
 
     for (gg in 1:n_test) {
         yhat <- list()
@@ -88,6 +100,8 @@ predict_newsubj <- function(object, kdims, R_list, S_list,
 
     result <- list(ypred = preds, yhat_samples = yhat_samples,
                    lower_pi = qlower, upper_pi = qupper)
+    }
+
     result
 }
 
